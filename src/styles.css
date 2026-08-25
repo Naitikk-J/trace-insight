@@ -381,3 +381,80 @@
 @utility pulse-ring {
   animation: clay-pulse-ring 2.2s ease-out infinite;
 }
+
+/* ---------- Landing page (cinematic) design tokens ---------- */
+
+:root {
+  --lp-bg: #06070a;
+  --lp-bg-2: #090b10;
+  --lp-surface: #0d1017;
+  --lp-elevated: #141925;
+  --lp-text: #f4f7fb;
+  --lp-text-2: #98a2b3;
+  --lp-muted: #667085;
+  --lp-accent: #6e8cff;
+  --lp-accent-2: #8b7cff;
+  --lp-signal: #4da3ff;
+  --lp-verified: #4ce0a3;
+  --lp-warning: #ffb84d;
+  --lp-critical: #ff5c70;
+  --lp-line: rgb(255 255 255 / 0.08);
+  --lp-line-strong: rgb(255 255 255 / 0.16);
+}
+
+@theme inline {
+  --color-lp-bg: var(--lp-bg);
+  --color-lp-bg-2: var(--lp-bg-2);
+  --color-lp-surface: var(--lp-surface);
+  --color-lp-elevated: var(--lp-elevated);
+  --color-lp-text: var(--lp-text);
+  --color-lp-text-2: var(--lp-text-2);
+  --color-lp-muted: var(--lp-muted);
+  --color-lp-accent: var(--lp-accent);
+  --color-lp-accent-2: var(--lp-accent-2);
+  --color-lp-signal: var(--lp-signal);
+  --color-lp-verified: var(--lp-verified);
+  --color-lp-warning: var(--lp-warning);
+  --color-lp-critical: var(--lp-critical);
+  --color-lp-line: var(--lp-line);
+  --color-lp-line-strong: var(--lp-line-strong);
+}
+
+/* Hairline technical frame — used instead of rounded cards on the landing page. */
+@utility lp-rule {
+  border-top: 1px solid var(--lp-line);
+}
+
+@utility lp-frame {
+  border: 1px solid var(--lp-line);
+  background: linear-gradient(
+    180deg,
+    rgb(255 255 255 / 0.028),
+    rgb(255 255 255 / 0)
+  );
+}
+
+@utility lp-display {
+  font-weight: 600;
+  letter-spacing: -0.035em;
+  line-height: 0.94;
+  text-transform: uppercase;
+}
+
+@utility lp-meta {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--lp-muted);
+}
+
+@utility lp-scanline {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    rgb(255 255 255 / 0.022) 0px,
+    rgb(255 255 255 / 0.022) 1px,
+    transparent 1px,
+    transparent 4px
+  );
+}
