@@ -9,6 +9,9 @@ interface UIState {
   setCreateCaseOpen: (open: boolean) => void;
   startInvestigationOpen: boolean;
   setStartInvestigationOpen: (open: boolean) => void;
+  /** Pre-selects a case when opening the start-investigation dialog. */
+  presetCaseId: string | null;
+  setPresetCaseId: (id: string | null) => void;
 }
 
 export const useUIStore = create<UIState>((set) => ({
@@ -21,6 +24,8 @@ export const useUIStore = create<UIState>((set) => ({
   startInvestigationOpen: false,
   setStartInvestigationOpen: (startInvestigationOpen) =>
     set({ startInvestigationOpen }),
+  presetCaseId: null,
+  setPresetCaseId: (presetCaseId) => set({ presetCaseId }),
 }));
 
 /** Workspace-local selection state for the investigation canvas + inspector. */

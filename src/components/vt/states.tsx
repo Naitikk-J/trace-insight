@@ -10,11 +10,11 @@ export function PageHeader({
   actions,
   className,
 }: {
-  eyebrow?: string;
+  eyebrow?: string | undefined;
   title: string;
-  description?: string;
+  description?: string | undefined;
   actions?: React.ReactNode;
-  className?: string;
+  className?: string | undefined;
 }) {
   return (
     <header
