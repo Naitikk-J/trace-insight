@@ -7,6 +7,7 @@ import { CommandPalette } from "@/components/vt/CommandPalette";
 import { CreateCaseDialog } from "@/components/vt/CreateCaseDialog";
 import { StartInvestigationDialog } from "@/components/vt/StartInvestigationDialog";
 import { useAuth } from "@/hooks/useAuth";
+import { useUIStore } from "@/stores/ui";
 
 export const Route = createFileRoute("/_authenticated")({
   component: AuthenticatedLayout,
@@ -15,6 +16,7 @@ export const Route = createFileRoute("/_authenticated")({
 function AuthenticatedLayout() {
   const { session, loading } = useAuth();
   const navigate = useNavigate();
+  const presetCaseId = useUIStore((s) => s.presetCaseId);
 
   useEffect(() => {
     if (!loading && !session) void navigate({ to: "/auth" });
@@ -38,7 +40,7 @@ function AuthenticatedLayout() {
       </AppShell>
       <CommandPalette />
       <CreateCaseDialog />
-      <StartInvestigationDialog />
+      <StartInvestigationDialog presetCaseId={presetCaseId ?? undefined} />
     </>
   );
 }

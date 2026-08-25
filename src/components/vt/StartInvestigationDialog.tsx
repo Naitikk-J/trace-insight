@@ -65,7 +65,7 @@ type FormValues = z.infer<typeof schema>;
 export function StartInvestigationDialog({
   presetCaseId,
 }: {
-  presetCaseId?: string;
+  presetCaseId?: string | undefined;
 }) {
   const open = useUIStore((s) => s.startInvestigationOpen);
   const setOpen = useUIStore((s) => s.setStartInvestigationOpen);
