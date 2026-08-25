@@ -1,0 +1,341 @@
+/**
+ * Data access layer.
+ *
+ * Every read/write against the backend goes through this module so that the UI
+ * never talks to the database client directly. Row-level security scopes access
+ * to authenticated investigators.
+ */
+import { queryOptions } from "@tanstack/react-query";
+
+import { supabase } from "@/integrations/supabase/client";
+import type {
+  CaseRecord,
+  EvidenceRecord,
+  FindingRecord,
+  InvestigationRecord,
+  ReportRecord,
+} from "@/lib/domain";
+
+function unwrap<T>(res: { data: T | null; error: { message: string } | null }): T {
+  if (res.error) throw new Error(res.error.message);
+  return res.data as T;
+}
+
+/* ---------------- Cases ---------------- */
+
+export const casesQuery = () =>
+  queryOptions({
+    queryKey: ["cases"],
+    queryFn: async () =>
+      unwrap<CaseRecord[]>(
+        (await supabase
+          .from("cases")
+          .select("*")
+          .order("created_at", { ascending: false })) as never,
+      ),
+  });
+
+export const caseQuery = (id: string) =>
+  queryOptions({
+    queryKey: ["cases", id],
+    queryFn: async () =>
+      unwrap<CaseRecord>(
+        (await supabase.from("cases").select("*").eq("id", id).single()) as never,
+      ),
+  });
+
+export interface CaseInput {
+  title: string;
+  description?: string;
+  priority: string;
+  status?: string;
+  jurisdiction?: string;
+  reported_loss?: number | null;
+}
+
+export async function createCase(input: CaseInput) {
+  const { data: auth } = await supabase.auth.getUser();
+  const userId = auth.user?.id;
+  if (!userId) throw new Error("You must be signed in to create a case.");
+
+  const case_ref = `CASE-${new Date().getFullYear()}-${String(
+    Math.floor(Math.random() * 9000) + 1000,
+  )}`;
+
+  return unwrap<CaseRecord>(
+    (await supabase
+      .from("cases")
+      .insert({ ...input, case_ref, created_by: userId, assigned_to: userId })
+      .select()
+      .single()) as never,
+  );
+}
+
+export async function updateCase(id: string, patch: Partial<CaseInput>) {
+  return unwrap<CaseRecord>(
+    (await supabase
+      .from("cases")
+      .update(patch)
+      .eq("id", id)
+      .select()
+      .single()) as never,
+  );
+}
+
+export async function deleteCase(id: string) {
+  const { error } = await supabase.from("cases").delete().eq("id", id);
+  if (error) throw new Error(error.message);
+}
+
+/* ---------------- Investigations ---------------- */
+
+export const investigationsQuery = (caseId?: string) =>
+  queryOptions({
+    queryKey: ["investigations", caseId ?? "all"],
+    queryFn: async () => {
+      let q = supabase
+        .from("investigations")
+        .select("*")
+        .order("created_at", { ascending: false });
+      if (caseId) q = q.eq("case_id", caseId);
+      return unwrap<InvestigationRecord[]>((await q) as never);
+    },
+  });
+
+export const investigationQuery = (id: string) =>
+  queryOptions({
+    queryKey: ["investigations", "detail", id],
+    queryFn: async () =>
+      unwrap<InvestigationRecord>(
+        (await supabase
+          .from("investigations")
+          .select("*")
+          .eq("id", id)
+          .single()) as never,
+      ),
+  });
+
+export interface InvestigationInput {
+  case_id: string;
+  name: string;
+  description?: string;
+  target_address: string;
+  blockchain: string;
+  trace_depth: number;
+  window_start?: string | null;
+  window_end?: string | null;
+  min_value?: number | null;
+  status?: string;
+}
+
+export async function createInvestigation(input: InvestigationInput) {
+  const { data: auth } = await supabase.auth.getUser();
+  const userId = auth.user?.id;
+  if (!userId) throw new Error("You must be signed in to start an investigation.");
+
+  const investigation_ref = `INV-${String(Math.floor(Math.random() * 9000) + 1000)}`;
+
+  return unwrap<InvestigationRecord>(
+    (await supabase
+      .from("investigations")
+      .insert({
+        ...input,
+        investigation_ref,
+        status: input.status ?? "queued",
+        created_by: userId,
+      })
+      .select()
+      .single()) as never,
+  );
+}
+
+export async function updateInvestigation(
+  id: string,
+  patch: Record<string, unknown>,
+) {
+  return unwrap<InvestigationRecord>(
+    (await supabase
+      .from("investigations")
+      .update(patch)
+      .eq("id", id)
+      .select()
+      .single()) as never,
+  );
+}
+
+/* ---------------- Findings ---------------- */
+
+export const findingsQuery = (filters?: {
+  caseId?: string;
+  investigationId?: string;
+}) =>
+  queryOptions({
+    queryKey: [
+      "findings",
+      filters?.caseId ?? "all",
+      filters?.investigationId ?? "all",
+    ],
+    queryFn: async () => {
+      let q = supabase
+        .from("findings")
+        .select("*")
+        .order("created_at", { ascending: false });
+      if (filters?.caseId) q = q.eq("case_id", filters.caseId);
+      if (filters?.investigationId)
+        q = q.eq("investigation_id", filters.investigationId);
+      return unwrap<FindingRecord[]>((await q) as never);
+    },
+  });
+
+export interface FindingInput {
+  case_id?: string | null;
+  investigation_id?: string | null;
+  title: string;
+  description?: string;
+  severity: string;
+  confidence: number;
+  finding_type?: string;
+  related?: Record<string, unknown>;
+}
+
+export async function createFinding(input: FindingInput) {
+  const { data: auth } = await supabase.auth.getUser();
+  const userId = auth.user?.id;
+  if (!userId) throw new Error("You must be signed in to record a finding.");
+
+  return unwrap<FindingRecord>(
+    (await supabase
+      .from("findings")
+      .insert({
+        ...input,
+        finding_ref: `FND-${String(Math.floor(Math.random() * 9000) + 1000)}`,
+        created_by: userId,
+      })
+      .select()
+      .single()) as never,
+  );
+}
+
+/* ---------------- Evidence ---------------- */
+
+export const evidenceQuery = (filters?: {
+  caseId?: string;
+  investigationId?: string;
+}) =>
+  queryOptions({
+    queryKey: [
+      "evidence",
+      filters?.caseId ?? "all",
+      filters?.investigationId ?? "all",
+    ],
+    queryFn: async () => {
+      let q = supabase
+        .from("evidence")
+        .select("*")
+        .order("created_at", { ascending: false });
+      if (filters?.caseId) q = q.eq("case_id", filters.caseId);
+      if (filters?.investigationId)
+        q = q.eq("investigation_id", filters.investigationId);
+      return unwrap<EvidenceRecord[]>((await q) as never);
+    },
+  });
+
+export interface EvidenceInput {
+  case_id?: string | null;
+  investigation_id?: string | null;
+  title: string;
+  evidence_type: string;
+  description?: string;
+  source?: string;
+  metadata?: Record<string, unknown>;
+}
+
+export async function createEvidence(input: EvidenceInput) {
+  const { data: auth } = await supabase.auth.getUser();
+  const userId = auth.user?.id;
+  if (!userId) throw new Error("You must be signed in to add evidence.");
+
+  return unwrap<EvidenceRecord>(
+    (await supabase
+      .from("evidence")
+      .insert({
+        ...input,
+        evidence_ref: `EVD-${String(Math.floor(Math.random() * 9000) + 1000)}`,
+        added_by: userId,
+      })
+      .select()
+      .single()) as never,
+  );
+}
+
+/* ---------------- Reports ---------------- */
+
+export const reportsQuery = () =>
+  queryOptions({
+    queryKey: ["reports"],
+    queryFn: async () =>
+      unwrap<ReportRecord[]>(
+        (await supabase
+          .from("reports")
+          .select("*")
+          .order("created_at", { ascending: false })) as never,
+      ),
+  });
+
+export interface ReportInput {
+  case_id?: string | null;
+  investigation_id?: string | null;
+  title: string;
+  sections: string[];
+  notes?: string;
+  status?: string;
+}
+
+export async function createReport(input: ReportInput) {
+  const { data: auth } = await supabase.auth.getUser();
+  const userId = auth.user?.id;
+  if (!userId) throw new Error("You must be signed in to build a report.");
+
+  return unwrap<ReportRecord>(
+    (await supabase
+      .from("reports")
+      .insert({
+        ...input,
+        report_ref: `RPT-${String(Math.floor(Math.random() * 9000) + 1000)}`,
+        created_by: userId,
+      })
+      .select()
+      .single()) as never,
+  );
+}
+
+/* ---------------- Profile & roles ---------------- */
+
+export const profileQuery = (userId: string | undefined) =>
+  queryOptions({
+    queryKey: ["profile", userId],
+    enabled: Boolean(userId),
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", userId!)
+        .maybeSingle();
+      if (error) throw new Error(error.message);
+      return data;
+    },
+  });
+
+export const rolesQuery = (userId: string | undefined) =>
+  queryOptions({
+    queryKey: ["roles", userId],
+    enabled: Boolean(userId),
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", userId!);
+      if (error) throw new Error(error.message);
+      return (data ?? []).map((r) => r.role as string);
+    },
+  });
