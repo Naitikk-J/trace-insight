@@ -20,6 +20,7 @@ import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedCasesIndexRouteImport } from './routes/_authenticated.cases.index'
 import { Route as AuthenticatedCasesCaseIdRouteImport } from './routes/_authenticated.cases.$caseId'
 import { Route as AuthenticatedInvestigationsIndexRouteImport } from './routes/_authenticated.investigations.index'
+import { Route as AuthenticatedInvestigationsInvestigationIdRouteImport } from './routes/_authenticated.investigations.$investigationId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -77,6 +78,12 @@ const AuthenticatedInvestigationsIndexRoute =
     path: '/investigations/',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedInvestigationsInvestigationIdRoute =
+  AuthenticatedInvestigationsInvestigationIdRouteImport.update({
+    id: '/investigations/$investigationId',
+    path: '/investigations/$investigationId',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -87,6 +94,7 @@ export interface FileRoutesByFullPath {
   '/reports': typeof AuthenticatedReportsRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/cases/$caseId': typeof AuthenticatedCasesCaseIdRoute
+  '/investigations/$investigationId': typeof AuthenticatedInvestigationsInvestigationIdRoute
   '/cases/': typeof AuthenticatedCasesIndexRoute
   '/investigations/': typeof AuthenticatedInvestigationsIndexRoute
 }
@@ -99,6 +107,7 @@ export interface FileRoutesByTo {
   '/reports': typeof AuthenticatedReportsRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/cases/$caseId': typeof AuthenticatedCasesCaseIdRoute
+  '/investigations/$investigationId': typeof AuthenticatedInvestigationsInvestigationIdRoute
   '/cases': typeof AuthenticatedCasesIndexRoute
   '/investigations': typeof AuthenticatedInvestigationsIndexRoute
 }
@@ -113,6 +122,7 @@ export interface FileRoutesById {
   '/_authenticated/reports': typeof AuthenticatedReportsRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/cases/$caseId': typeof AuthenticatedCasesCaseIdRoute
+  '/_authenticated/investigations/$investigationId': typeof AuthenticatedInvestigationsInvestigationIdRoute
   '/_authenticated/cases/': typeof AuthenticatedCasesIndexRoute
   '/_authenticated/investigations/': typeof AuthenticatedInvestigationsIndexRoute
 }
@@ -127,6 +137,7 @@ export interface FileRouteTypes {
     | '/reports'
     | '/settings'
     | '/cases/$caseId'
+    | '/investigations/$investigationId'
     | '/cases/'
     | '/investigations/'
   fileRoutesByTo: FileRoutesByTo
@@ -139,6 +150,7 @@ export interface FileRouteTypes {
     | '/reports'
     | '/settings'
     | '/cases/$caseId'
+    | '/investigations/$investigationId'
     | '/cases'
     | '/investigations'
   id:
@@ -152,6 +164,7 @@ export interface FileRouteTypes {
     | '/_authenticated/reports'
     | '/_authenticated/settings'
     | '/_authenticated/cases/$caseId'
+    | '/_authenticated/investigations/$investigationId'
     | '/_authenticated/cases/'
     | '/_authenticated/investigations/'
   fileRoutesById: FileRoutesById
@@ -241,6 +254,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedInvestigationsIndexRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/investigations/$investigationId': {
+      id: '/_authenticated/investigations/$investigationId'
+      path: '/investigations/$investigationId'
+      fullPath: '/investigations/$investigationId'
+      preLoaderRoute: typeof AuthenticatedInvestigationsInvestigationIdRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
   }
 }
 
@@ -251,6 +271,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedReportsRoute: typeof AuthenticatedReportsRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedCasesCaseIdRoute: typeof AuthenticatedCasesCaseIdRoute
+  AuthenticatedInvestigationsInvestigationIdRoute: typeof AuthenticatedInvestigationsInvestigationIdRoute
   AuthenticatedCasesIndexRoute: typeof AuthenticatedCasesIndexRoute
   AuthenticatedInvestigationsIndexRoute: typeof AuthenticatedInvestigationsIndexRoute
 }
@@ -262,6 +283,8 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedReportsRoute: AuthenticatedReportsRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedCasesCaseIdRoute: AuthenticatedCasesCaseIdRoute,
+  AuthenticatedInvestigationsInvestigationIdRoute:
+    AuthenticatedInvestigationsInvestigationIdRoute,
   AuthenticatedCasesIndexRoute: AuthenticatedCasesIndexRoute,
   AuthenticatedInvestigationsIndexRoute: AuthenticatedInvestigationsIndexRoute,
 }
