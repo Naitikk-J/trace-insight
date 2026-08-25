@@ -5,17 +5,17 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * TRACIFY design system.
- * Dark-only intelligence surface. All colour, elevation, and typography values
- * live here as semantic tokens — never hardcode colours in components.
+ * TRACIFY design system — Claymorphism intelligence surface.
+ * Soft 3D layered clay panels, deep navy base, indigo/violet/teal accents.
+ * All colour, elevation and typography live here as semantic tokens.
  */
 
 @theme inline {
-  --radius-sm: calc(var(--radius) - 3px);
-  --radius-md: calc(var(--radius) - 1px);
+  --radius-sm: calc(var(--radius) - 6px);
+  --radius-md: calc(var(--radius) - 3px);
   --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 3px);
-  --radius-2xl: calc(var(--radius) + 6px);
+  --radius-xl: calc(var(--radius) + 6px);
+  --radius-2xl: calc(var(--radius) + 12px);
 
   --font-sans:
     Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -35,6 +35,7 @@
   --color-primary-foreground: var(--primary-foreground);
   --color-intel: var(--intel);
   --color-intel-foreground: var(--intel-foreground);
+  --color-teal: var(--teal);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-muted: var(--muted);
@@ -63,79 +64,86 @@
   --color-sidebar-ring: var(--sidebar-ring);
   --color-chart-1: var(--primary);
   --color-chart-2: var(--intel);
-  --color-chart-3: var(--positive);
+  --color-chart-3: var(--teal);
   --color-chart-4: var(--warning);
   --color-chart-5: var(--critical);
 
-  --shadow-panel: 0 1px 0 0 var(--hairline), 0 18px 40px -28px oklch(0 0 0 / 0.9);
-  --shadow-float: 0 24px 60px -24px oklch(0 0 0 / 0.85);
-  --shadow-focus: 0 0 0 1px var(--primary), 0 0 24px -6px var(--primary-glow);
+  --shadow-clay:
+    0 18px 40px -18px oklch(0 0 0 / 0.75), 0 2px 0 0 oklch(1 0 0 / 0.05) inset,
+    0 -14px 24px -18px oklch(0 0 0 / 0.5) inset;
+  --shadow-clay-lift:
+    0 30px 60px -22px oklch(0 0 0 / 0.85), 0 2px 0 0 oklch(1 0 0 / 0.07) inset;
+  --shadow-float: 0 34px 70px -26px oklch(0 0 0 / 0.9);
+  --shadow-focus: 0 0 0 1px var(--primary), 0 0 30px -6px var(--primary-glow);
 
-  --spacing-rail: 76px;
-  --spacing-sidebar: 264px;
-  --spacing-topbar: 72px;
+  --spacing-rail: 84px;
+  --spacing-sidebar: 268px;
+  --spacing-topbar: 76px;
 }
 
 :root {
-  --radius: 0.5rem;
+  --radius: 1rem;
 
-  --background: oklch(0.1449 0.0115 266.85);
-  --workspace: oklch(0.1687 0.0155 266.65);
-  --surface: oklch(0.205 0.0234 265.47);
-  --elevated: oklch(0.2306 0.025 263.89);
+  --background: oklch(0.1509 0.0175 265);
+  --workspace: oklch(0.1861 0.0198 265);
+  --surface: oklch(0.2183 0.0231 264);
+  --elevated: oklch(0.2564 0.0252 263);
 
-  --foreground: oklch(0.955 0.006 265);
-  --muted: oklch(0.205 0.0234 265.47);
-  --muted-foreground: oklch(0.665 0.021 265);
+  --foreground: oklch(0.9276 0.0058 264);
+  --muted: oklch(0.2183 0.0231 264);
+  --muted-foreground: oklch(0.7118 0.0208 264);
 
-  --card: oklch(0.1687 0.0155 266.65);
-  --card-foreground: oklch(0.955 0.006 265);
-  --popover: oklch(0.2306 0.025 263.89);
-  --popover-foreground: oklch(0.955 0.006 265);
+  --card: oklch(0.2183 0.0231 264);
+  --card-foreground: oklch(0.9276 0.0058 264);
+  --popover: oklch(0.2564 0.0252 263);
+  --popover-foreground: oklch(0.9276 0.0058 264);
 
-  --primary: oklch(0.6623 0.1786 264.64);
-  --primary-foreground: oklch(0.14 0.02 265);
-  --primary-glow: oklch(0.6623 0.1786 264.64 / 0.55);
+  --primary: oklch(0.5854 0.2041 277.12);
+  --primary-foreground: oklch(0.98 0.005 277);
+  --primary-glow: oklch(0.5854 0.2041 277.12 / 0.65);
 
-  --intel: oklch(0.6626 0.1876 285.27);
-  --intel-foreground: oklch(0.14 0.02 285);
+  --intel: oklch(0.6268 0.2325 303.9);
+  --intel-foreground: oklch(0.98 0.005 304);
+  --teal: oklch(0.7889 0.1341 197.65);
 
-  --secondary: oklch(0.2306 0.025 263.89);
-  --secondary-foreground: oklch(0.93 0.008 265);
-  --accent: oklch(0.2306 0.025 263.89);
-  --accent-foreground: oklch(0.955 0.006 265);
+  --secondary: oklch(0.2564 0.0252 263);
+  --secondary-foreground: oklch(0.9276 0.0058 264);
+  --accent: oklch(0.2564 0.0252 263);
+  --accent-foreground: oklch(0.9276 0.0058 264);
 
-  --critical: oklch(0.6938 0.1975 18.25);
-  --critical-foreground: oklch(0.14 0.02 18);
-  --destructive: oklch(0.6938 0.1975 18.25);
-  --destructive-foreground: oklch(0.14 0.02 18);
-  --warning: oklch(0.8245 0.1486 73.35);
-  --warning-foreground: oklch(0.16 0.03 73);
-  --positive: oklch(0.7968 0.1636 159.69);
-  --positive-foreground: oklch(0.15 0.03 160);
+  --critical: oklch(0.6368 0.2078 25.33);
+  --critical-foreground: oklch(0.98 0.01 25);
+  --destructive: oklch(0.6368 0.2078 25.33);
+  --destructive-foreground: oklch(0.98 0.01 25);
+  --warning: oklch(0.7686 0.1647 70.08);
+  --warning-foreground: oklch(0.18 0.03 70);
+  --positive: oklch(0.7227 0.192 149.58);
+  --positive-foreground: oklch(0.17 0.04 150);
 
-  --border: oklch(1 0 0 / 8%);
-  --border-strong: oklch(1 0 0 / 14%);
+  --border: oklch(1 0 0 / 7%);
+  --border-strong: oklch(1 0 0 / 13%);
   --hairline: oklch(1 0 0 / 6%);
-  --input: oklch(1 0 0 / 12%);
-  --ring: oklch(0.6623 0.1786 264.64 / 0.7);
+  --input: oklch(1 0 0 / 10%);
+  --ring: oklch(0.5854 0.2041 277.12 / 0.7);
 
-  --sidebar: oklch(0.1449 0.0115 266.85);
-  --sidebar-foreground: oklch(0.78 0.014 265);
-  --sidebar-primary: oklch(0.6623 0.1786 264.64);
-  --sidebar-primary-foreground: oklch(0.14 0.02 265);
-  --sidebar-accent: oklch(0.205 0.0234 265.47);
-  --sidebar-accent-foreground: oklch(0.955 0.006 265);
+  --sidebar: oklch(0.1861 0.0198 265);
+  --sidebar-foreground: oklch(0.8 0.014 264);
+  --sidebar-primary: oklch(0.5854 0.2041 277.12);
+  --sidebar-primary-foreground: oklch(0.98 0.005 277);
+  --sidebar-accent: oklch(0.2564 0.0252 263);
+  --sidebar-accent-foreground: oklch(0.9276 0.0058 264);
   --sidebar-border: oklch(1 0 0 / 7%);
-  --sidebar-ring: oklch(0.6623 0.1786 264.64 / 0.7);
+  --sidebar-ring: oklch(0.5854 0.2041 277.12 / 0.7);
 
   --gradient-intel: linear-gradient(135deg, var(--primary), var(--intel));
-  --gradient-panel: linear-gradient(
-    180deg,
-    oklch(1 0 0 / 0.035),
-    oklch(1 0 0 / 0)
+  --gradient-clay: linear-gradient(
+    155deg,
+    oklch(1 0 0 / 0.07) 0%,
+    oklch(1 0 0 / 0.02) 42%,
+    oklch(0 0 0 / 0.12) 100%
   );
-  --grid-line: oklch(1 0 0 / 0.045);
+  --gradient-panel: var(--gradient-clay);
+  --grid-line: oklch(1 0 0 / 0.05);
 }
 
 .dark {
@@ -153,6 +161,23 @@
 
   body {
     background-color: var(--color-background);
+    background-image:
+      radial-gradient(
+        60% 45% at 12% -5%,
+        oklch(0.5854 0.2041 277.12 / 0.16),
+        transparent 70%
+      ),
+      radial-gradient(
+        50% 40% at 92% 0%,
+        oklch(0.6268 0.2325 303.9 / 0.13),
+        transparent 70%
+      ),
+      radial-gradient(
+        45% 45% at 60% 110%,
+        oklch(0.7889 0.1341 197.65 / 0.07),
+        transparent 70%
+      );
+    background-attachment: fixed;
     color: var(--color-foreground);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
@@ -170,7 +195,7 @@
   h2,
   h3,
   h4 {
-    letter-spacing: -0.015em;
+    letter-spacing: -0.02em;
   }
 
   ::-webkit-scrollbar {
@@ -196,19 +221,75 @@
   letter-spacing: -0.01em;
 }
 
+/* Base clay panel — soft 3D surface with highlight from top-left. */
 @utility panel {
   background-color: var(--surface);
-  background-image: var(--gradient-panel);
+  background-image: var(--gradient-clay);
   border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-clay);
 }
 
 @utility panel-elevated {
   background-color: var(--elevated);
-  background-image: var(--gradient-panel);
+  background-image: var(--gradient-clay);
   border: 1px solid var(--border-strong);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-clay-lift);
+}
+
+@utility clay {
+  background-color: var(--surface);
+  background-image: var(--gradient-clay);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-clay);
+}
+
+@utility clay-lift {
+  transition:
+    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.25s ease;
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-clay-lift);
+    border-color: var(--border-strong);
+  }
+  &:active {
+    transform: translateY(-1px) scale(0.995);
+  }
+}
+
+/* Inset / pressed clay well — for inputs, tracks, code blocks. */
+@utility clay-inset {
+  background-color: oklch(0.1509 0.0175 265 / 0.75);
+  border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-panel);
+  box-shadow:
+    0 2px 8px 0 oklch(0 0 0 / 0.45) inset,
+    0 -1px 0 0 oklch(1 0 0 / 0.04) inset;
+}
+
+@utility clay-pill {
+  background-color: var(--elevated);
+  background-image: var(--gradient-clay);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  box-shadow: var(--shadow-clay);
+}
+
+@utility clay-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-lg);
+  background-image: var(--gradient-clay);
+  background-color: var(--elevated);
+  border: 1px solid var(--border-strong);
+  box-shadow:
+    0 8px 18px -10px oklch(0 0 0 / 0.8),
+    0 1px 0 0 oklch(1 0 0 / 0.07) inset;
 }
 
 @utility text-gradient-intel {
@@ -238,7 +319,7 @@
       var(--primary-glow),
       transparent 70%
     );
-    opacity: 0.18;
+    opacity: 0.2;
     pointer-events: none;
   }
 }
@@ -249,4 +330,54 @@
   letter-spacing: 0.09em;
   text-transform: uppercase;
   color: var(--muted-foreground);
+}
+
+@utility shimmer-line {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    oklch(1 0 0 / 0.08),
+    transparent
+  );
+  background-size: 200% 100%;
+  animation: clay-shimmer 1.6s linear infinite;
+}
+
+@keyframes clay-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+@keyframes clay-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+@utility clay-float {
+  animation: clay-float 6s ease-in-out infinite;
+}
+
+@keyframes clay-pulse-ring {
+  0% {
+    box-shadow: 0 0 0 0 var(--primary-glow);
+  }
+  70% {
+    box-shadow: 0 0 0 10px oklch(0 0 0 / 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 oklch(0 0 0 / 0);
+  }
+}
+
+@utility pulse-ring {
+  animation: clay-pulse-ring 2.2s ease-out infinite;
 }
