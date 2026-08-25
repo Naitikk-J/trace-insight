@@ -72,7 +72,9 @@ export function LoadingState({ rows = 4 }: { rows?: number }) {
   return (
     <div className="space-y-3" aria-busy="true" aria-live="polite">
       {Array.from({ length: rows }).map((_, i) => (
-        <Skeleton key={i} className="h-[74px] w-full rounded-lg bg-surface" />
+        <div key={i} className="clay h-[82px] w-full overflow-hidden">
+          <div className="shimmer-line size-full" />
+        </div>
       ))}
       <span className="sr-only">Loading</span>
     </div>
@@ -81,12 +83,13 @@ export function LoadingState({ rows = 4 }: { rows?: number }) {
 
 export function ErrorState({ message }: { message: string }) {
   return (
-    <div className="panel border-critical/30 bg-critical/5 px-5 py-6">
+    <div className="clay border-critical/30 px-5 py-6">
       <p className="text-sm font-medium text-critical">Could not load data</p>
       <p className="mt-1 text-sm text-muted-foreground">{message}</p>
     </div>
   );
 }
+
 
 export function StatTile({
   label,
