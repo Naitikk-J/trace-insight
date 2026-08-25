@@ -14,16 +14,381 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      cases: {
+        Row: {
+          assigned_to: string | null
+          case_ref: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          jurisdiction: string | null
+          priority: string
+          reported_loss: number | null
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          case_ref: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          jurisdiction?: string | null
+          priority?: string
+          reported_loss?: number | null
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          case_ref?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          jurisdiction?: string | null
+          priority?: string
+          reported_loss?: number | null
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      evidence: {
+        Row: {
+          added_by: string | null
+          attachment_url: string | null
+          case_id: string | null
+          created_at: string
+          description: string | null
+          evidence_ref: string
+          evidence_type: string
+          finding_id: string | null
+          id: string
+          investigation_id: string | null
+          metadata: Json
+          source: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          added_by?: string | null
+          attachment_url?: string | null
+          case_id?: string | null
+          created_at?: string
+          description?: string | null
+          evidence_ref: string
+          evidence_type?: string
+          finding_id?: string | null
+          id?: string
+          investigation_id?: string | null
+          metadata?: Json
+          source?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          added_by?: string | null
+          attachment_url?: string | null
+          case_id?: string | null
+          created_at?: string
+          description?: string | null
+          evidence_ref?: string
+          evidence_type?: string
+          finding_id?: string | null
+          id?: string
+          investigation_id?: string | null
+          metadata?: Json
+          source?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "evidence_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "cases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evidence_finding_id_fkey"
+            columns: ["finding_id"]
+            isOneToOne: false
+            referencedRelation: "findings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evidence_investigation_id_fkey"
+            columns: ["investigation_id"]
+            isOneToOne: false
+            referencedRelation: "investigations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      findings: {
+        Row: {
+          case_id: string | null
+          confidence: number
+          created_at: string
+          created_by: string | null
+          description: string | null
+          finding_ref: string
+          finding_type: string | null
+          id: string
+          investigation_id: string | null
+          related: Json
+          severity: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          case_id?: string | null
+          confidence?: number
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          finding_ref: string
+          finding_type?: string | null
+          id?: string
+          investigation_id?: string | null
+          related?: Json
+          severity?: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          case_id?: string | null
+          confidence?: number
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          finding_ref?: string
+          finding_type?: string | null
+          id?: string
+          investigation_id?: string | null
+          related?: Json
+          severity?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "findings_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "cases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "findings_investigation_id_fkey"
+            columns: ["investigation_id"]
+            isOneToOne: false
+            referencedRelation: "investigations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      investigations: {
+        Row: {
+          blockchain: string
+          case_id: string
+          completed_at: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          investigation_ref: string
+          min_value: number | null
+          name: string
+          status: string
+          summary: Json
+          target_address: string
+          trace_depth: number
+          updated_at: string
+          window_end: string | null
+          window_start: string | null
+        }
+        Insert: {
+          blockchain?: string
+          case_id: string
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          investigation_ref: string
+          min_value?: number | null
+          name: string
+          status?: string
+          summary?: Json
+          target_address: string
+          trace_depth?: number
+          updated_at?: string
+          window_end?: string | null
+          window_start?: string | null
+        }
+        Update: {
+          blockchain?: string
+          case_id?: string
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          investigation_ref?: string
+          min_value?: number | null
+          name?: string
+          status?: string
+          summary?: Json
+          target_address?: string
+          trace_depth?: number
+          updated_at?: string
+          window_end?: string | null
+          window_start?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "investigations_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "cases"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          agency: string | null
+          created_at: string
+          email: string | null
+          full_name: string | null
+          id: string
+          job_title: string | null
+          updated_at: string
+        }
+        Insert: {
+          agency?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id: string
+          job_title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          agency?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          job_title?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      reports: {
+        Row: {
+          case_id: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          investigation_id: string | null
+          notes: string | null
+          report_ref: string
+          sections: Json
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          case_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          investigation_id?: string | null
+          notes?: string | null
+          report_ref: string
+          sections?: Json
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          case_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          investigation_id?: string | null
+          notes?: string | null
+          report_ref?: string
+          sections?: Json
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reports_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "cases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reports_investigation_id_fkey"
+            columns: ["investigation_id"]
+            isOneToOne: false
+            referencedRelation: "investigations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "investigator"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +515,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "investigator"],
+    },
   },
 } as const
