@@ -24,13 +24,13 @@ import { EVIDENCE_TYPES } from "@/lib/domain";
 export const Route = createFileRoute("/_authenticated/evidence")({
   head: () => ({
     meta: [
-      { title: "Evidence vault — VASPTRACE" },
+      { title: "Evidence vault — TRACIFY" },
       {
         name: "description",
         content:
           "Immutable, time-stamped evidence for every case: pinned transactions, wallets, graph snapshots, documents and analyst notes.",
       },
-      { property: "og:title", content: "Evidence vault — VASPTRACE" },
+      { property: "og:title", content: "Evidence vault — TRACIFY" },
       {
         property: "og:description",
         content:

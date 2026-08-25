@@ -35,13 +35,13 @@ import { useUIStore } from "@/stores/ui";
 export const Route = createFileRoute("/_authenticated/investigations/")({
   head: () => ({
     meta: [
-      { title: "Investigations — VASPTRACE" },
+      { title: "Investigations — TRACIFY" },
       {
         name: "description",
         content:
           "Every blockchain trace you have run: target wallet, chain, hop depth, trace status and the case it belongs to.",
       },
-      { property: "og:title", content: "Investigations — VASPTRACE" },
+      { property: "og:title", content: "Investigations — TRACIFY" },
       {
         property: "og:description",
         content:
@@ -124,7 +124,7 @@ function InvestigationsPage() {
         <EmptyState
           icon={Radar}
           title="No investigations found"
-          description="Start a trace from a known target wallet. VASPTRACE builds a hop-limited graph rather than an unbounded crawl."
+          description="Start a trace from a known target wallet. TRACIFY builds a hop-limited graph rather than an unbounded crawl."
           action={
             <Button size="sm" onClick={() => setStartInvestigationOpen(true)}>
               Start investigation

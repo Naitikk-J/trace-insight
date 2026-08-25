@@ -20,22 +20,22 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { VaspTraceMark } from "@/components/vt/AppShell";
+import { TracifyMark } from "@/components/vt/AppShell";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
-      { title: "Sign in — VASPTRACE Investigator Console" },
+      { title: "Sign in — TRACIFY Investigator Console" },
       {
         name: "description",
         content:
-          "Secure sign-in for VASPTRACE, the blockchain investigation and financial intelligence console for cybercrime investigators.",
+          "Secure sign-in for TRACIFY, the blockchain investigation and financial intelligence console for cybercrime investigators.",
       },
-      { property: "og:title", content: "Sign in — VASPTRACE" },
+      { property: "og:title", content: "Sign in — TRACIFY" },
       {
         property: "og:description",
         content:
-          "Secure sign-in for the VASPTRACE blockchain investigation console.",
+          "Secure sign-in for the TRACIFY blockchain investigation console.",
       },
       { name: "robots", content: "noindex" },
     ],
@@ -117,9 +117,9 @@ function AuthPage() {
       <div className="ambient-glow relative hidden flex-col justify-between overflow-hidden border-r border-border bg-workspace p-10 lg:flex">
         <div className="canvas-grid absolute inset-0 opacity-60" aria-hidden />
         <div className="relative flex items-center gap-3">
-          <VaspTraceMark />
+          <TracifyMark />
           <div>
-            <p className="text-sm font-semibold tracking-tight">VASPTRACE</p>
+            <p className="text-sm font-semibold tracking-tight">TRACIFY</p>
             <p className="mono text-[10px] text-muted-foreground">
               investigator console
             </p>
@@ -137,7 +137,7 @@ function AuthPage() {
             <span className="text-gradient-intel"> not just the wallets.</span>
           </h1>
           <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-            VASPTRACE turns fragmented on-chain activity into a bounded,
+            TRACIFY turns fragmented on-chain activity into a bounded,
             evidence-backed investigation: relevant fund paths, ranked entity and
             VASP candidates, behavioural signals, and a defensible evidence trail.
           </p>
@@ -173,8 +173,8 @@ function AuthPage() {
           className="w-full max-w-sm"
         >
           <div className="mb-7 flex items-center gap-3 lg:hidden">
-            <VaspTraceMark />
-            <span className="text-sm font-semibold">VASPTRACE</span>
+            <TracifyMark />
+            <span className="text-sm font-semibold">TRACIFY</span>
           </div>
 
           <p className="label-caps">Restricted access</p>

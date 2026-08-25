@@ -39,7 +39,7 @@ const NAV = [
   { to: "/settings", label: "Settings", icon: Settings },
 ] as const;
 
-export function VaspTraceMark({ className }: { className?: string }) {
+export function TracifyMark({ className }: { className?: string }) {
   return (
     <span
       className={cn(
@@ -67,7 +67,7 @@ function Sidebar() {
       className="fixed inset-y-0 left-0 z-40 hidden flex-col border-r border-sidebar-border bg-sidebar lg:flex"
     >
       <div className="flex h-[72px] items-center gap-2.5 border-b border-sidebar-border px-4">
-        <VaspTraceMark />
+        <TracifyMark />
         <AnimatePresence initial={false}>
           {!collapsed && (
             <motion.div
@@ -78,7 +78,7 @@ function Sidebar() {
               className="min-w-0"
             >
               <p className="truncate text-sm font-semibold tracking-tight">
-                VASPTRACE
+                TRACIFY
               </p>
               <p className="mono truncate text-[10px] text-muted-foreground">
                 blockchain intelligence
@@ -162,8 +162,8 @@ function Topbar() {
   return (
     <header className="sticky top-0 z-30 flex h-[72px] items-center gap-3 border-b border-border bg-background/85 px-4 backdrop-blur-xl sm:px-6">
       <div className="flex items-center gap-2.5 lg:hidden">
-        <VaspTraceMark />
-        <span className="text-sm font-semibold">VASPTRACE</span>
+        <TracifyMark />
+        <span className="text-sm font-semibold">TRACIFY</span>
       </div>
 
       <button

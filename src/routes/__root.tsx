@@ -78,14 +78,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "VASPTRACE — Blockchain Investigation Platform" },
+      { title: "TRACIFY — Blockchain Investigation Platform" },
       {
         name: "description",
         content:
-          "VASPTRACE turns fragmented on-chain activity into bounded, evidence-backed investigations for financial crime investigators.",
+          "TRACIFY turns fragmented on-chain activity into bounded, evidence-backed investigations for financial crime investigators.",
       },
-      { name: "author", content: "VASPTRACE" },
-      { property: "og:title", content: "VASPTRACE — Blockchain Investigation Platform" },
+      { name: "author", content: "TRACIFY" },
+      { property: "og:title", content: "TRACIFY — Blockchain Investigation Platform" },
       {
         property: "og:description",
         content:

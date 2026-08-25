@@ -51,17 +51,17 @@ import { useUIStore } from "@/stores/ui";
 export const Route = createFileRoute("/_authenticated/cases/$caseId")({
   head: () => ({
     meta: [
-      { title: "Case file — VASPTRACE" },
+      { title: "Case file — TRACIFY" },
       {
         name: "description",
         content:
           "Full case file: linked blockchain investigations, evidence-backed findings, held evidence and generated intelligence reports.",
       },
-      { property: "og:title", content: "Case file — VASPTRACE" },
+      { property: "og:title", content: "Case file — TRACIFY" },
       {
         property: "og:description",
         content:
-          "Investigations, findings, evidence and reports for a single VASPTRACE case.",
+          "Investigations, findings, evidence and reports for a single TRACIFY case.",
       },
     ],
   }),

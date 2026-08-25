@@ -1,5 +1,5 @@
 /**
- * VASPTRACE domain model.
+ * TRACIFY domain model.
  *
  * These types mirror the database schema and are the single contract shared by
  * the data layer (src/lib/api), the intelligence service layer (src/services)

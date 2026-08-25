@@ -38,13 +38,13 @@ import { useUIStore } from "@/stores/ui";
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
     meta: [
-      { title: "Investigator dashboard — VASPTRACE" },
+      { title: "Investigator dashboard — TRACIFY" },
       {
         name: "description",
         content:
-          "What needs attention now: active blockchain traces, priority cases, and the latest evidence-backed findings across your VASPTRACE workspace.",
+          "What needs attention now: active blockchain traces, priority cases, and the latest evidence-backed findings across your TRACIFY workspace.",
       },
-      { property: "og:title", content: "Investigator dashboard — VASPTRACE" },
+      { property: "og:title", content: "Investigator dashboard — TRACIFY" },
       {
         property: "og:description",
         content:

@@ -10,13 +10,13 @@ import { intelligence } from "@/services/intelligence";
 export const Route = createFileRoute("/_authenticated/settings")({
   head: () => ({
     meta: [
-      { title: "Workspace settings — VASPTRACE" },
+      { title: "Workspace settings — TRACIFY" },
       {
         name: "description",
         content:
           "Your investigator profile and role, supported blockchain networks, and the intelligence services currently bound to this workspace.",
       },
-      { property: "og:title", content: "Workspace settings — VASPTRACE" },
+      { property: "og:title", content: "Workspace settings — TRACIFY" },
       {
         property: "og:description",
         content:
