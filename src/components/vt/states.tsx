@@ -52,8 +52,8 @@ export function EmptyState({
   action?: React.ReactNode;
 }) {
   return (
-    <div className="panel flex flex-col items-center justify-center gap-3 px-6 py-14 text-center">
-      <div className="flex size-11 items-center justify-center rounded-lg border border-border bg-elevated text-muted-foreground">
+    <div className="clay-inset flex flex-col items-center justify-center gap-3 px-6 py-12 text-center">
+      <div className="clay-icon flex size-12 text-muted-foreground">
         <Icon className="size-5" />
       </div>
       <div>
@@ -66,6 +66,7 @@ export function EmptyState({
     </div>
   );
 }
+
 
 export function LoadingState({ rows = 4 }: { rows?: number }) {
   return (
