@@ -46,11 +46,11 @@ export const caseQuery = (id: string) =>
 
 export interface CaseInput {
   title: string;
-  description?: string;
+  description?: string | undefined;
   priority: string;
-  status?: string;
-  jurisdiction?: string;
-  reported_loss?: number | null;
+  status?: string | undefined;
+  jurisdiction?: string | undefined;
+  reported_loss?: number | null | undefined;
 }
 
 export async function createCase(input: CaseInput) {
@@ -118,14 +118,14 @@ export const investigationQuery = (id: string) =>
 export interface InvestigationInput {
   case_id: string;
   name: string;
-  description?: string;
+  description?: string | undefined;
   target_address: string;
   blockchain: string;
   trace_depth: number;
-  window_start?: string | null;
-  window_end?: string | null;
-  min_value?: number | null;
-  status?: string;
+  window_start?: string | null | undefined;
+  window_end?: string | null | undefined;
+  min_value?: number | null | undefined;
+  status?: string | undefined;
 }
 
 export async function createInvestigation(input: InvestigationInput) {
@@ -188,14 +188,14 @@ export const findingsQuery = (filters?: {
   });
 
 export interface FindingInput {
-  case_id?: string | null;
-  investigation_id?: string | null;
+  case_id?: string | null | undefined;
+  investigation_id?: string | null | undefined;
   title: string;
-  description?: string;
+  description?: string | undefined;
   severity: string;
   confidence: number;
-  finding_type?: string;
-  related?: Record<string, unknown>;
+  finding_type?: string | undefined;
+  related?: Record<string, unknown> | undefined;
 }
 
 export async function createFinding(input: FindingInput) {
@@ -241,13 +241,13 @@ export const evidenceQuery = (filters?: {
   });
 
 export interface EvidenceInput {
-  case_id?: string | null;
-  investigation_id?: string | null;
+  case_id?: string | null | undefined;
+  investigation_id?: string | null | undefined;
   title: string;
   evidence_type: string;
-  description?: string;
-  source?: string;
-  metadata?: Record<string, unknown>;
+  description?: string | undefined;
+  source?: string | undefined;
+  metadata?: Record<string, unknown> | undefined;
 }
 
 export async function createEvidence(input: EvidenceInput) {
@@ -283,12 +283,12 @@ export const reportsQuery = () =>
   });
 
 export interface ReportInput {
-  case_id?: string | null;
-  investigation_id?: string | null;
+  case_id?: string | null | undefined;
+  investigation_id?: string | null | undefined;
   title: string;
   sections: string[];
-  notes?: string;
-  status?: string;
+  notes?: string | undefined;
+  status?: string | undefined;
 }
 
 export async function createReport(input: ReportInput) {
