@@ -111,9 +111,9 @@ export function StatTile({
   }[tone];
 
   return (
-    <div className="panel px-4 py-3.5">
+    <div className="clay clay-lift px-5 py-4">
       <p className="label-caps">{label}</p>
-      <p className={cn("mt-2 text-2xl font-semibold tabular-nums", toneClass)}>
+      <p className={cn("mt-2 text-[28px] font-semibold tabular-nums", toneClass)}>
         {value}
       </p>
       {hint ? (
@@ -122,3 +122,4 @@ export function StatTile({
     </div>
   );
 }
+
