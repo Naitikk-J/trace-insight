@@ -65,7 +65,7 @@ export async function createCase(input: CaseInput) {
   return unwrap<CaseRecord>(
     (await supabase
       .from("cases")
-      .insert({ ...input, case_ref, created_by: userId, assigned_to: userId })
+      .insert({ ...input, case_ref, created_by: userId, assigned_to: userId } as never)
       .select()
       .single()) as never,
   );
@@ -75,7 +75,7 @@ export async function updateCase(id: string, patch: Partial<CaseInput>) {
   return unwrap<CaseRecord>(
     (await supabase
       .from("cases")
-      .update(patch)
+      .update(patch as never)
       .eq("id", id)
       .select()
       .single()) as never,
@@ -143,7 +143,7 @@ export async function createInvestigation(input: InvestigationInput) {
         investigation_ref,
         status: input.status ?? "queued",
         created_by: userId,
-      })
+      } as never)
       .select()
       .single()) as never,
   );
@@ -156,7 +156,7 @@ export async function updateInvestigation(
   return unwrap<InvestigationRecord>(
     (await supabase
       .from("investigations")
-      .update(patch)
+      .update(patch as never)
       .eq("id", id)
       .select()
       .single()) as never,
@@ -210,7 +210,7 @@ export async function createFinding(input: FindingInput) {
         ...input,
         finding_ref: `FND-${String(Math.floor(Math.random() * 9000) + 1000)}`,
         created_by: userId,
-      })
+      } as never)
       .select()
       .single()) as never,
   );
@@ -262,7 +262,7 @@ export async function createEvidence(input: EvidenceInput) {
         ...input,
         evidence_ref: `EVD-${String(Math.floor(Math.random() * 9000) + 1000)}`,
         added_by: userId,
-      })
+      } as never)
       .select()
       .single()) as never,
   );
@@ -303,7 +303,7 @@ export async function createReport(input: ReportInput) {
         ...input,
         report_ref: `RPT-${String(Math.floor(Math.random() * 9000) + 1000)}`,
         created_by: userId,
-      })
+      } as never)
       .select()
       .single()) as never,
   );

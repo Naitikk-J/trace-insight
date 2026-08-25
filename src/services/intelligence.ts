@@ -165,7 +165,7 @@ export const mockBlockchainProvider: BlockchainProvider = {
   },
 };
 
-const HOP_X = [60, 260, 470, 680, 890];
+const HOP_X = [60, 260, 470, 680, 890] as const;
 
 export const mockGraphService: GraphService = {
   build(investigation) {
@@ -217,7 +217,6 @@ export const mockGraphService: GraphService = {
         nodes.push({
           id,
           address: pseudoAddress(seed + id),
-          address_placeholder: undefined,
           label:
             kind === "vasp"
               ? "Exchange deposit cluster"
@@ -287,12 +286,13 @@ export const mockPathAnalysisService: PathAnalysisService = {
       const continuity = [0.87, 0.42, 0.31][index] ?? 0.3;
       return {
         id: ["PATH-A", "PATH-B", "PATH-C"][index] ?? `PATH-${index}`,
-        label: ["Primary hypothesis", "Secondary branch", "Alternative branch"][
-          index
-        ] ?? "Branch",
+        label:
+          ["Primary hypothesis", "Secondary branch", "Alternative branch"][
+            index
+          ] ?? "Branch",
         nodeIds: chain,
         continuity,
-        valuePreserved: [`${(continuity * 318.9).toFixed(1)}k USDT`][0],
+        valuePreserved: `${(continuity * 318.9).toFixed(1)}k USDT`,
         hops: graph.bounds.hops,
         endpointKind: endpoint.kind,
         verdict:
@@ -436,7 +436,7 @@ export function buildTimeline(graph: InvestigationGraph): TimelineEvent[] {
     const target = graph.nodes.find((n) => n.id === edge.to);
     events.push({
       id: `tl-${i + 1}`,
-      at: edge.timestamp.split(" · ")[0],
+      at: edge.timestamp.split(" · ")[0] ?? "Day 1",
       clock: edge.timestamp.split(" · ")[1] ?? "—",
       title:
         target?.kind === "vasp"
