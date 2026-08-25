@@ -14,13 +14,13 @@ import { casesQuery, reportsQuery } from "@/lib/api/queries";
 export const Route = createFileRoute("/_authenticated/reports")({
   head: () => ({
     meta: [
-      { title: "Intelligence reports — VASPTRACE" },
+      { title: "Intelligence reports — TRACIFY" },
       {
         name: "description",
         content:
           "Assembled intelligence reports: executive summary, traced fund paths, entity and VASP attribution, behavioural signals and the supporting evidence index.",
       },
-      { property: "og:title", content: "Intelligence reports — VASPTRACE" },
+      { property: "og:title", content: "Intelligence reports — TRACIFY" },
       {
         property: "og:description",
         content:

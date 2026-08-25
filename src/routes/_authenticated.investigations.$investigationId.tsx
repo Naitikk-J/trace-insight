@@ -47,13 +47,13 @@ export const Route = createFileRoute(
 )({
   head: () => ({
     meta: [
-      { title: "Investigation workspace — VASPTRACE" },
+      { title: "Investigation workspace — TRACIFY" },
       {
         name: "description",
         content:
           "The investigation workspace: a bounded fund-flow graph, ranked value-continuity paths, entity and VASP attribution candidates, behavioural signals and a chronological timeline.",
       },
-      { property: "og:title", content: "Investigation workspace — VASPTRACE" },
+      { property: "og:title", content: "Investigation workspace — TRACIFY" },
       {
         property: "og:description",
         content:
@@ -101,7 +101,7 @@ function WorkspacePage() {
         title: input.title,
         evidence_type: input.type,
         description: input.description,
-        source: `VASPTRACE workspace · ${investigation.data?.investigation_ref ?? ""}`,
+        source: `TRACIFY workspace · ${investigation.data?.investigation_ref ?? ""}`,
       }),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ["evidence"] });
@@ -578,7 +578,7 @@ function WorkspacePage() {
                   </div>
                   <p className="flex items-center gap-1.5 text-xs">
                     <Clock className="size-3.5" />
-                    Scope is deliberately bounded — VASPTRACE never crawls the
+                    Scope is deliberately bounded — TRACIFY never crawls the
                     whole chain.
                   </p>
                 </div>

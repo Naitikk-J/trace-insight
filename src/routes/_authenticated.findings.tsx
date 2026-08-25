@@ -24,13 +24,13 @@ import { SEVERITIES, truncateAddress } from "@/lib/domain";
 export const Route = createFileRoute("/_authenticated/findings")({
   head: () => ({
     meta: [
-      { title: "Findings — VASPTRACE" },
+      { title: "Findings — TRACIFY" },
       {
         name: "description",
         content:
           "Analyst conclusions with explicit confidence and supporting evidence: attribution, behavioural patterns and path continuity findings.",
       },
-      { property: "og:title", content: "Findings — VASPTRACE" },
+      { property: "og:title", content: "Findings — TRACIFY" },
       {
         property: "og:description",
         content:
