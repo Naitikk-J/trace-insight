@@ -437,7 +437,7 @@ export function buildTimeline(graph: InvestigationGraph): TimelineEvent[] {
     events.push({
       id: `tl-${i + 1}`,
       at: edge.timestamp.split(" · ")[0] ?? "Day 1",
-      clock: edge.timestamp.split(" · ")[1] ?? "—",
+      clock: edge.timestamp.split(" · ")[1] ?? "--:--",
       title:
         target?.kind === "vasp"
           ? "Traced value reaches attributed endpoint"
@@ -446,7 +446,7 @@ export function buildTimeline(graph: InvestigationGraph): TimelineEvent[] {
             : `Value moved to ${target?.label ?? "wallet"}`,
       detail: `${edge.value} · continuity ${(edge.continuity * 100).toFixed(0)}%`,
       nodeId: edge.to,
-      pathId: edge.pathIds[0],
+      pathId: edge.pathIds[0] ?? "PATH-A",
       kind:
         target?.kind === "vasp"
           ? "attribution"
