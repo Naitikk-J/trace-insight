@@ -312,7 +312,8 @@ function Topbar() {
 function MobileNav() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   return (
-    <nav className="sticky bottom-0 z-30 flex items-center justify-between gap-1 border-t border-border bg-background/95 px-2 py-2 backdrop-blur-xl lg:hidden">
+    <nav className="sticky bottom-0 z-30 px-3 pb-3 lg:hidden">
+      <div className="clay flex items-center justify-between gap-1 px-2 py-2">
       {NAV.slice(0, 5).map(({ to, label, icon: Icon }) => {
         const active = pathname.startsWith(to);
         return (
@@ -320,8 +321,8 @@ function MobileNav() {
             key={to}
             to={to}
             className={cn(
-              "flex flex-1 flex-col items-center gap-1 rounded-md py-1.5 text-[10px]",
-              active ? "text-primary" : "text-muted-foreground",
+              "flex flex-1 flex-col items-center gap-1 rounded-xl py-1.5 text-[10px] transition-colors",
+              active ? "clay-inset text-primary" : "text-muted-foreground",
             )}
           >
             <Icon className="size-[18px]" />
@@ -329,7 +330,9 @@ function MobileNav() {
           </Link>
         );
       })}
+      </div>
     </nav>
+
   );
 }
 
