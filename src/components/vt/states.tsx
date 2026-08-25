@@ -1,7 +1,6 @@
 import type { LucideIcon } from "lucide-react";
 
 import { cn } from "@/lib/utils";
-import { Skeleton } from "@/components/ui/skeleton";
 
 export function PageHeader({
   eyebrow,
@@ -19,7 +18,7 @@ export function PageHeader({
   return (
     <header
       className={cn(
-        "flex flex-col gap-4 border-b border-border pb-6 sm:flex-row sm:items-end sm:justify-between",
+        "clay flex flex-col gap-4 p-6 sm:flex-row sm:items-end sm:justify-between",
         className,
       )}
     >
@@ -39,6 +38,7 @@ export function PageHeader({
   );
 }
 
+
 export function EmptyState({
   icon: Icon,
   title,
@@ -51,8 +51,8 @@ export function EmptyState({
   action?: React.ReactNode;
 }) {
   return (
-    <div className="panel flex flex-col items-center justify-center gap-3 px-6 py-14 text-center">
-      <div className="flex size-11 items-center justify-center rounded-lg border border-border bg-elevated text-muted-foreground">
+    <div className="clay-inset flex flex-col items-center justify-center gap-3 px-6 py-12 text-center">
+      <div className="clay-icon flex size-12 text-muted-foreground">
         <Icon className="size-5" />
       </div>
       <div>
@@ -66,11 +66,14 @@ export function EmptyState({
   );
 }
 
+
 export function LoadingState({ rows = 4 }: { rows?: number }) {
   return (
     <div className="space-y-3" aria-busy="true" aria-live="polite">
       {Array.from({ length: rows }).map((_, i) => (
-        <Skeleton key={i} className="h-[74px] w-full rounded-lg bg-surface" />
+        <div key={i} className="clay h-[82px] w-full overflow-hidden">
+          <div className="shimmer-line size-full" />
+        </div>
       ))}
       <span className="sr-only">Loading</span>
     </div>
@@ -79,12 +82,13 @@ export function LoadingState({ rows = 4 }: { rows?: number }) {
 
 export function ErrorState({ message }: { message: string }) {
   return (
-    <div className="panel border-critical/30 bg-critical/5 px-5 py-6">
+    <div className="clay border-critical/30 px-5 py-6">
       <p className="text-sm font-medium text-critical">Could not load data</p>
       <p className="mt-1 text-sm text-muted-foreground">{message}</p>
     </div>
   );
 }
+
 
 export function StatTile({
   label,
@@ -106,9 +110,9 @@ export function StatTile({
   }[tone];
 
   return (
-    <div className="panel px-4 py-3.5">
+    <div className="clay clay-lift px-5 py-4">
       <p className="label-caps">{label}</p>
-      <p className={cn("mt-2 text-2xl font-semibold tabular-nums", toneClass)}>
+      <p className={cn("mt-2 text-[28px] font-semibold tabular-nums", toneClass)}>
         {value}
       </p>
       {hint ? (
@@ -117,3 +121,4 @@ export function StatTile({
     </div>
   );
 }
+
