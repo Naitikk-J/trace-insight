@@ -114,7 +114,8 @@ function buildLayout(count: number): Layout {
   // Edge candidates: nearest-neighbour sampling keeps the graph readable.
   const pairs: number[][] = [];
   for (let i = 0; i < PATH_COUNT - 1; i++) pairs.push([i, i + 1]);
-  for (let i = PATH_COUNT; i < count; i += 2) {
+  // Sparse sampling: relationships should read as a lattice, not a haze.
+  for (let i = PATH_COUNT; i < count; i += 5) {
     let best = -1;
     let bestD = Infinity;
     for (let k = 0; k < 14; k++) {
@@ -248,7 +249,7 @@ function Network({ lite }: { lite: boolean }) {
         lp[o + 4] = lp[o + 1]!;
         lp[o + 5] = lp[o + 2]!;
       }
-      const b = traced ? 1 : 0.085 * edgeReveal;
+      const b = traced ? 1 : 0.11 * edgeReveal;
       const c = traced ? SIGNAL : ACCENT;
       for (let v = 0; v < 2; v++) {
         lc[o + v * 3] = c.r * b;
