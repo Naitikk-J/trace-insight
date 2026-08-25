@@ -115,7 +115,7 @@ function buildLayout(count: number): Layout {
   const pairs: number[][] = [];
   for (let i = 0; i < PATH_COUNT - 1; i++) pairs.push([i, i + 1]);
   // Sparse sampling: relationships should read as a lattice, not a haze.
-  for (let i = PATH_COUNT; i < count; i += 5) {
+  for (let i = PATH_COUNT; i < count; i += 3) {
     let best = -1;
     let bestD = Infinity;
     for (let k = 0; k < 14; k++) {
@@ -310,7 +310,7 @@ function Network({ lite }: { lite: boolean }) {
 
     // Recede behind the narrative once the story becomes text-led.
     const recede =
-      (1 - 0.62 * ramp(p, 0.42, 0.8)) * (1 - 0.62 * ramp(p, 0.82, 1));
+      (1 - 0.45 * ramp(p, 0.42, 0.8)) * (1 - 0.3 * ramp(p, 0.82, 1));
     if (lines.current) {
       (lines.current.material as THREE.LineBasicMaterial).opacity =
         0.34 * recede;
