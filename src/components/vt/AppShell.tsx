@@ -354,17 +354,18 @@ export function AppShell({
       >
         <div
           className={cn(
-            "flex min-h-screen flex-col",
-            collapsed ? "lg:pl-[76px]" : "lg:pl-[264px]",
+            "flex min-h-screen flex-col transition-[padding] duration-300",
+            collapsed ? "lg:pl-[84px]" : "lg:pl-[268px]",
           )}
         >
           <Topbar />
           <main
             className={cn(
               "flex-1",
-              bare ? "" : "mx-auto w-full max-w-[1400px] px-4 py-7 sm:px-6",
+              bare ? "" : "mx-auto w-full max-w-[1480px] px-4 py-6 sm:px-6",
             )}
           >
+
             {children}
           </main>
           <MobileNav />
