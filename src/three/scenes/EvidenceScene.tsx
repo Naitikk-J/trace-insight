@@ -90,7 +90,7 @@ export function EvidenceScene() {
       </group>
 
       <group ref={labels}>
-      {SLABS.map((s) => (
+      {SLABS.filter((s) => s.label !== "EXPORTABLE CASE FILE").map((s) => (
         <DataFragment
           key={s.label}
           position={[s.x, s.y, s.z + 0.6]}
