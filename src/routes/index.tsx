@@ -14,6 +14,7 @@ import {
   ChapterRail,
   DepthHud,
   FinalCta,
+  TopRightAuth,
 } from "@/components/landing/StoryOverlay";
 import { useStoryProgress } from "@/hooks/useStoryProgress";
 
@@ -81,6 +82,7 @@ function Landing() {
       />
 
       <BrandMark />
+      <TopRightAuth />
       <ChapterCopy chapter={chapter} />
       <ChapterRail chapter={chapter} onJump={jump} />
       <DepthHud progress={progress} />

@@ -231,3 +231,15 @@ export function BrandMark() {
     </div>
   );
 }
+
+/** Persistent sign-in entry point in the top-right corner. */
+export function TopRightAuth() {
+  return (
+    <Link
+      to="/auth"
+      className="fixed right-6 top-6 z-30 rounded-full border border-border/60 bg-background/60 px-4 py-2 text-xs font-medium text-foreground/90 shadow-lg backdrop-blur-md transition-all hover:border-primary/40 hover:bg-background/80 hover:text-primary"
+    >
+      Sign in
+    </Link>
+  );
+}

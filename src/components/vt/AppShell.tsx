@@ -268,40 +268,49 @@ function Topbar() {
           </DropdownMenuContent>
         </DropdownMenu>
 
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button
-              type="button"
-              className="clay clay-lift flex items-center gap-2.5 px-2.5 py-1.5 text-left"
-            >
-              <span
-                className="flex size-8 items-center justify-center rounded-lg text-xs font-semibold uppercase text-primary-foreground"
-                style={{ backgroundImage: "var(--gradient-intel)" }}
+        {user ? (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                className="clay clay-lift flex items-center gap-2.5 px-2.5 py-1.5 text-left"
               >
-                {name.slice(0, 2)}
-              </span>
-              <span className="hidden min-w-0 sm:block">
-                <span className="block truncate text-xs font-medium">{name}</span>
-                <span className="mono block truncate text-[10px] text-muted-foreground">
-                  {isAdmin ? "admin" : "investigator"}
+                <span
+                  className="flex size-8 items-center justify-center rounded-lg text-xs font-semibold uppercase text-primary-foreground"
+                  style={{ backgroundImage: "var(--gradient-intel)" }}
+                >
+                  {name.slice(0, 2)}
                 </span>
-              </span>
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56">
-            <DropdownMenuLabel className="mono text-[11px] font-normal text-muted-foreground">
-              {user?.email}
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem asChild>
-              <Link to="/settings">Settings</Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem onSelect={() => void signOut()}>
-              <LogOut className="size-4" />
-              Sign out
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+                <span className="hidden min-w-0 sm:block">
+                  <span className="block truncate text-xs font-medium">{name}</span>
+                  <span className="mono block truncate text-[10px] text-muted-foreground">
+                    {isAdmin ? "admin" : "investigator"}
+                  </span>
+                </span>
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuLabel className="mono text-[11px] font-normal text-muted-foreground">
+                {user?.email}
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem asChild>
+                <Link to="/settings">Settings</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => void signOut()}>
+                <LogOut className="size-4" />
+                Sign out
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        ) : (
+          <Button asChild variant="default" size="sm" className="clay clay-lift gap-2 rounded-xl">
+            <Link to="/auth">
+              <LogOut className="size-4 rotate-180" />
+              Sign in
+            </Link>
+          </Button>
+        )}
       </div>
       </div>
     </header>
