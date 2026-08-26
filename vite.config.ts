@@ -20,6 +20,11 @@ export default defineConfig(({ command }) => ({
       },
     }),
     viteReact(),
-    command === "build" ? nitro({ defaultPreset: "vercel" }) : null,
+    command === "build"
+      ? nitro({
+          defaultPreset: "vercel",
+          noExternals: true,
+        })
+      : null,
   ],
 }));
