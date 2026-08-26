@@ -133,8 +133,9 @@ export function ChapterCopy({ chapter }: { chapter: Chapter }) {
       {o.meta ? (
         <dl
           className={cn(
-            "flex max-w-full flex-wrap gap-x-6 gap-y-2 font-mono text-[9px] tracking-[0.16em] transition-all duration-700 md:text-[10px]",
-            o.align === "right" ? "justify-end" : "",
+            "flex max-w-full flex-wrap gap-x-5 gap-y-2.5 font-mono text-[9px] leading-tight tracking-[0.14em] transition-all duration-700 md:gap-x-6 md:tracking-[0.16em] md:text-[10px]",
+            o.align === "right" ? "md:justify-end" : "",
+
             shown ? "opacity-100" : "translate-y-4 opacity-0",
           )}
           style={{ transitionDelay: "880ms" }}
