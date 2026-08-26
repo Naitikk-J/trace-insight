@@ -5,6 +5,7 @@
 import { Suspense } from "react";
 import { Canvas } from "@react-three/fiber";
 
+import { AdaptiveQuality } from "@/components/landing/AdaptiveQuality";
 import { StoryWorld } from "@/three/scenes/StoryWorld";
 import { story } from "@/three/utils/storyState";
 import { BG } from "@/three/materials/palette";
@@ -23,6 +24,7 @@ export default function LandingCanvas() {
       camera={{ position: [0, 0, 92], fov: 55, near: 0.1, far: 1400 }}
       style={{ background: BG, pointerEvents: "none" }}
     >
+      <AdaptiveQuality />
       <Suspense fallback={null}>
         <StoryWorld />
       </Suspense>

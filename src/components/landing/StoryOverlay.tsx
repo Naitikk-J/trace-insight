@@ -6,7 +6,12 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 
-import { CHAPTERS, chapterNumber, type Chapter } from "@/three/utils/storyConfig";
+import {
+  CHAPTERS,
+  chapterAt,
+  chapterNumber,
+  type Chapter,
+} from "@/three/utils/storyConfig";
 import { story } from "@/three/utils/storyState";
 import { cn } from "@/lib/utils";
 
@@ -116,7 +121,13 @@ export function ChapterCopy({ chapter }: { chapter: Chapter }) {
   );
 }
 
-/** Persistent chapter navigation: also a map of the world's depth. */
+/**
+ * Persistent chapter navigation: also a map of the world's depth.
+ *
+ * The active marker tracks the live Lenis scroll value (`story.raw`) rather than
+ * the smoothed camera progress, so the rail reacts the instant the user moves.
+ * Arrow / Page / Home / End keys travel chapter to chapter.
+ */
 export function ChapterRail({
   chapter,
   onJump,
@@ -124,23 +135,92 @@ export function ChapterRail({
   chapter: Chapter;
   onJump: (at: number) => void;
 }) {
+  const [activeId, setActiveId] = useState(chapter.id);
+  const activeRef = useRef(chapter.id);
+
+  useEffect(() => {
+    let frame = 0;
+    const tick = () => {
+      const next = chapterAt(story.raw).id;
+      if (next !== activeRef.current) {
+        activeRef.current = next;
+        setActiveId(next);
+      }
+      frame = requestAnimationFrame(tick);
+    };
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
+  }, []);
+
+  useEffect(() => {
+    const step = (dir: number) => {
+      const i = CHAPTERS.findIndex((c) => c.id === activeRef.current);
+      const next = CHAPTERS[Math.max(0, Math.min(CHAPTERS.length - 1, i + dir))];
+      if (next) onJump(next.at);
+    };
+
+    const onKey = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (
+        target &&
+        (target.isContentEditable ||
+          ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName))
+      )
+        return;
+
+      switch (e.key) {
+        case "ArrowDown":
+        case "ArrowRight":
+        case "PageDown":
+        case "j":
+          e.preventDefault();
+          step(1);
+          break;
+        case "ArrowUp":
+        case "ArrowLeft":
+        case "PageUp":
+        case "k":
+          e.preventDefault();
+          step(-1);
+          break;
+        case "Home":
+          e.preventDefault();
+          onJump(0);
+          break;
+        case "End":
+          e.preventDefault();
+          onJump(1);
+          break;
+        default:
+          break;
+      }
+    };
+
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onJump]);
+
   return (
-    <nav className="fixed right-4 top-1/2 z-30 hidden -translate-y-1/2 flex-col items-end gap-3 md:flex">
+    <nav
+      aria-label="Chapters"
+      className="fixed right-4 top-1/2 z-30 hidden -translate-y-1/2 flex-col items-end gap-3 md:flex"
+    >
       {CHAPTERS.map((c) => {
-        const active = c.id === chapter.id;
+        const active = c.id === activeId;
         return (
           <button
             key={c.id}
             onClick={() => onJump(c.at)}
-            className="group flex items-center gap-3 text-right"
+            className="group flex items-center gap-3 text-right focus-visible:outline-none"
             aria-label={`Go to chapter ${c.label}`}
+            aria-current={active ? "true" : undefined}
           >
             <span
               className={cn(
                 "font-mono text-[9px] tracking-[0.24em] transition-all duration-500",
                 active
                   ? "text-foreground opacity-100"
-                  : "text-muted-foreground opacity-0 group-hover:opacity-70",
+                  : "text-muted-foreground opacity-0 group-hover:opacity-70 group-focus-visible:opacity-70",
               )}
             >
               {c.label}
@@ -150,7 +230,7 @@ export function ChapterRail({
                 "h-px transition-all duration-500",
                 active
                   ? "w-8 bg-primary"
-                  : "w-3 bg-muted-foreground/40 group-hover:w-5",
+                  : "w-3 bg-muted-foreground/40 group-hover:w-5 group-focus-visible:w-5",
               )}
             />
           </button>

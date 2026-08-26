@@ -18,7 +18,21 @@ export const story = {
   lite: false,
   /** prefers-reduced-motion. */
   reduced: false,
+  /** Adaptive quality multiplier, 1 = full. Scenes scale detail by this. */
+  quality: 1,
+  /** Current adaptive tier index (0 = best). */
+  fpsTier: 0,
+  /** Last measured frame rate. */
+  fps: 60,
 };
+
+/** Adaptive render tiers, best → cheapest. */
+export const QUALITY_TIERS = [
+  { dpr: 1.75, quality: 1 },
+  { dpr: 1.35, quality: 0.75 },
+  { dpr: 1, quality: 0.55 },
+  { dpr: 0.8, quality: 0.4 },
+] as const;
 
 export function detectLite() {
   if (typeof window === "undefined") return { lite: false, reduced: false };
