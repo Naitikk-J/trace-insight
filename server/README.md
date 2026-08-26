@@ -2,7 +2,7 @@
 
 Backend for **VASPTRACE**, a blockchain intelligence and financial investigation platform. The API powers the investigator workspace: cases, investigations, findings, evidence and reports.
 
-> **Status: Phase A complete.** Express + TypeScript + MongoDB foundation, environment validation, consistent API envelopes, global error handling and the health endpoint are implemented and compiling. Auth and the domain modules land in the following phases.
+> **Status: feature-complete.** Auth (JWT + bcrypt + RBAC), cases, investigations with the trace/intelligence engine, findings, sealed evidence, report generation, dashboard aggregation, audit logging, a demo seed, Docker packaging and CI are all implemented, type-checked and covered by 81 tests. The only deliberately outstanding piece is the trained ML model: `services/intelligence.service.ts` exposes `expandGraph`/`scoreRisk` as the swap-in points for real chain ingestion and model weights.
 
 ## Tech stack
 
@@ -13,7 +13,7 @@ Backend for **VASPTRACE**, a blockchain intelligence and financial investigation
 | Language       | TypeScript (strict)             |
 | Database       | MongoDB via Mongoose 8          |
 | Validation     | Zod                             |
-| Auth (planned) | JWT + bcrypt                    |
+| Auth           | JWT + bcrypt                    |
 | Dev runner     | tsx watch                       |
 
 The API runs **independently** from the frontend (different port, own `package.json`).
@@ -70,7 +70,18 @@ npm run dev        # watch mode on http://localhost:5000
 npm run build      # type-check + emit to dist/
 npm start          # run the compiled build
 npm run typecheck  # types only
+npm test           # 81 tests
+npm run seed       # load the demo investigation dataset (never in production)
 ```
+
+### Docker
+
+```bash
+cd server
+JWT_SECRET=$(openssl rand -hex 48) CLIENT_URL=http://localhost:8080 docker compose up --build
+```
+
+The database is not published to the host, the API runs as a non-root user, and the container image contains production dependencies only.
 
 The process exits with a clear message if MongoDB is unreachable — it never serves traffic without a database.
 
@@ -78,29 +89,40 @@ The process exits with a clear message if MongoDB is unreachable — it never se
 
 Base URL: `http://localhost:5000/api`
 
-| Method | Endpoint  | Auth | Description  |
-| ------ | --------- | ---- | ------------ |
-| GET    | `/health` | no   | Service probe |
+All endpoints except `/health*`, `/auth/register` and `/auth/login` require `Authorization: Bearer <token>`.
+
+| Method | Endpoint | Description |
+| --- | --- | --- |
+| GET | `/health`, `/health/ready` | Liveness and readiness probes |
+| POST | `/auth/register` | Create an account (first account becomes admin) |
+| POST | `/auth/login` | Exchange credentials for a token |
+| GET/PATCH | `/auth/me` | Read or update the current profile |
+| POST | `/auth/password` | Change password (verifies the current one) |
+| POST | `/auth/logout` | Audit-logged sign-out |
+| GET | `/users` | Workspace directory (for case assignment) |
+| PATCH | `/users/:id` | Admin only: role and activation |
+| GET | `/dashboard/overview` | Aggregated command-centre metrics |
+| GET/POST | `/cases` | List (paginated, filtered, text search) and create |
+| GET/PATCH/DELETE | `/cases/:id` | Detail (with children), update, cascade delete |
+| POST/DELETE | `/cases/:id/assignees[/:userId]` | Assign or unassign an investigator |
+| GET/POST | `/investigations` | List traces, start a trace |
+| GET | `/investigations/:id` | Investigation record |
+| GET | `/investigations/:id/graph` | Bounded hop graph (nodes + edges) |
+| GET | `/investigations/:id/analysis` | Ranked paths, behavioural signals, risk |
+| POST | `/investigations/:id/rerun` | Re-queue the trace |
+| GET/POST | `/findings` | List and record findings |
+| GET/PATCH/DELETE | `/findings/:id` | Read, update, delete |
+| GET/POST | `/evidence` | List and pin (seals a SHA-256 checksum) |
+| GET | `/evidence/:id/verify` | Re-verify the chain-of-custody seal |
+| PATCH/DELETE | `/evidence/:id` | Metadata only / owner-or-admin delete |
+| GET/POST | `/reports` | List and generate a report from case contents |
+| GET | `/reports/:id/export.csv` | CSV export |
+| PATCH/DELETE | `/reports/:id` | Update (finalised reports are locked), delete |
 
 ```bash
 curl http://localhost:5000/api/health
 ```
 
-```json
-{
-  "success": true,
-  "message": "VASPTRACE API is running",
-  "data": {
-    "status": "ok",
-    "environment": "development",
-    "database": "connected",
-    "uptimeSeconds": 3,
-    "timestamp": "2026-08-25T21:40:00.000Z"
-  }
-}
-```
-
-Planned mounts: `/api/auth`, `/api/cases`, `/api/investigations`, `/api/findings`, `/api/evidence`, `/api/reports`.
 
 ### Response contract
 
@@ -124,21 +146,30 @@ Error:
 
 Handled centrally: Zod and Mongoose validation errors, duplicate keys (409), invalid ObjectIds, JWT invalid/expired (401), authorization (403), unknown (500). Stack traces are included only outside production.
 
-## Authentication overview (Phase B)
+## Authentication
 
 - `POST /api/auth/register`, `POST /api/auth/login`, `GET /api/auth/me`, `POST /api/auth/logout`
 - bcrypt-hashed passwords, never returned in responses
 - JWT bearer tokens: `Authorization: Bearer <token>`
-- `protect` middleware attaches `req.user`; `authorize("admin")` enforces roles
+- `requireAuth` attaches `req.user` and re-reads the account so deactivation is immediate; `requireRole("admin")` enforces roles
 - Roles: `investigator`, `admin`
 
-## Next phases
+## Intelligence engine
 
-- **B** — User model, register/login/me, JWT + role middleware
-- **C** — Case model and CRUD with pagination, search, filters (`CASE-2026-0001` ids)
-- **D** — Investigation model, CRUD, `GET /api/cases/:caseId/investigations`
-- **E** — Findings, Evidence, Reports
-- **F** — `services/blockchain/` provider abstractions, seed script, frontend API client wiring
+`services/intelligence.service.ts` is pure and deterministic — no database, no network — which is what makes it testable and swappable:
+
+- `expandGraph` — bounded breadth-first hop expansion preserving value continuity; terminal (service) addresses never forward value.
+- `rankPaths` — root-to-leaf paths scored by retained value, aggregate risk, hop economy and service termination; every path carries a plain-language rationale.
+- `detectSignals` — mixer touchpoints, peeling/splitting, structuring bursts and regulated-service exposure, each with confidence and supporting addresses.
+- `scoreRisk` — blends structural risk with signal severity into a bounded 0–100 score.
+
+Replacing the synthetic expansion with a real chain-ingestion adapter, or `scoreRisk` with trained model weights, requires no changes to the HTTP layer.
+
+## Data model
+
+`User`, `Case`, `Investigation` (embedded graph + metrics), `Finding`, `Evidence` (sealed payload + SHA-256), `Report`, `AuditLog`, `Counter` (atomic `CASE-2026-0001`-style references).
+
+Authorisation is centralised in `services/access.service.ts`: every case-scoped read and write passes `assertCaseAccess`, unauthorised ids return `404` so they cannot be enumerated, and destructive actions additionally require case ownership or admin.
 
 ## Security & production-readiness audit
 
@@ -159,6 +190,6 @@ Findings resolved during the audit pass:
 ### Testing
 
 ```bash
-npm test          # 40 transport, validation, security and redaction tests
+npm test          # 81 tests: transport, validation, security, redaction, auth guards, intelligence engine
 npm run typecheck
 ```
