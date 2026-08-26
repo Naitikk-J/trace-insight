@@ -2,7 +2,7 @@
 
 Backend for **VASPTRACE**, a blockchain intelligence and financial investigation platform. The API powers the investigator workspace: cases, investigations, findings, evidence and reports.
 
-> **Status: feature-complete.** Auth (JWT + bcrypt + RBAC), cases, investigations with the trace/intelligence engine, findings, sealed evidence, report generation, dashboard aggregation, audit logging, a demo seed, Docker packaging and CI are all implemented, type-checked and covered by 81 tests. The only deliberately outstanding piece is the trained ML model: `services/intelligence.service.ts` exposes `expandGraph`/`scoreRisk` as the swap-in points for real chain ingestion and model weights.
+> **Status: feature-complete.** Auth (JWT + bcrypt + RBAC), cases, investigations with the trace/intelligence engine, findings, sealed evidence, report generation, dashboard aggregation, audit logging, a demo seed, Docker packaging and CI are all implemented, type-checked and covered by 104 tests. GraphSense is integrated as the live chain-data provider with a deterministic offline fallback. The only deliberately outstanding piece is the trained ML model: `scoreRisk` is the swap-in point for model weights.
 
 ## Tech stack
 
@@ -60,6 +60,9 @@ cp .env.example .env # then fill in the values
 | `JWT_SECRET`     | **yes**  | —                       | min 24 chars; `openssl rand -hex 48`             |
 | `JWT_EXPIRES_IN` | no       | `7d`                    | token lifetime                                   |
 | `CLIENT_URL`     | no       | `http://localhost:5173` | allowed CORS origin(s), comma-separated          |
+| `GRAPHSENSE_API_URL` | no | — | GraphSense REST base URL; empty = synthetic provider |
+| `GRAPHSENSE_API_KEY` | conditional | — | required whenever the URL is set |
+| `GRAPHSENSE_TIMEOUT_MS` | no | `12000` | per-request timeout for chain lookups |
 
 Missing or invalid values abort startup with an explicit list of problems. Secrets are never hardcoded and `.env` is git-ignored.
 
@@ -102,6 +105,9 @@ All endpoints except `/health*`, `/auth/register` and `/auth/login` require `Aut
 | GET | `/users` | Workspace directory (for case assignment) |
 | PATCH | `/users/:id` | Admin only: role and activation |
 | GET | `/dashboard/overview` | Aggregated command-centre metrics |
+| GET | `/intelligence/providers` | Which chain-data provider serves each chain, and reachability |
+| GET | `/intelligence/addresses/:chain/:address` | Address summary, attribution tags, baseline risk |
+| GET | `/intelligence/addresses/:chain/:address/neighbours` | Ranked counterparties (`direction`, `limit`, `minValueUsd`) |
 | GET/POST | `/cases` | List (paginated, filtered, text search) and create |
 | GET/PATCH/DELETE | `/cases/:id` | Detail (with children), update, cascade delete |
 | POST/DELETE | `/cases/:id/assignees[/:userId]` | Assign or unassign an investigator |
@@ -154,6 +160,48 @@ Handled centrally: Zod and Mongoose validation errors, duplicate keys (409), inv
 - `requireAuth` attaches `req.user` and re-reads the account so deactivation is immediate; `requireRole("admin")` enforces roles
 - Roles: `investigator`, `admin`
 
+## Chain data — GraphSense integration
+
+Chain data is reached through one narrow provider contract
+(`services/blockchain/types.ts`): `getAddress`, `getNeighbours`, `getTags`,
+`healthcheck`. Two implementations ship:
+
+| Provider | When it is used | Notes |
+| --- | --- | --- |
+| `GraphSenseProvider` | `GRAPHSENSE_API_URL` set **and** the chain is indexed | GraphSense REST (self-hosted or Iknaio-hosted) |
+| `SyntheticProvider` | otherwise | deterministic, offline, used by local dev, CI and demos |
+
+Resolution is per chain, not global: GraphSense indexes `btc`, `eth` and `trx`,
+so `bitcoin`, `ethereum` and `tron` go live while `polygon`, `bsc` and
+`arbitrum` stay on the synthetic provider instead of hitting an endpoint that
+can only 404. `GET /api/intelligence/providers` reports the exact mapping.
+
+What the adapter owns (and nothing else in the codebase knows about):
+
+- currency-code mapping, pagination and `pagesize` headroom;
+- fiat arrays → a single USD number, unix seconds → `Date`;
+- tag taxonomy → `category`, `entity`, `isVasp`, and a normalised 0–1
+  confidence from GraphSense's confidence levels/bands;
+- token transfer totals preferred over the native value when larger.
+
+Hardening in the request path: the API key travels in the `Authorization`
+header (never the URL), every call has a bounded timeout, transient network
+and 5xx failures are retried once, and provider responses are translated into
+`404` / `429` / `502` — an upstream body is never forwarded to a client.
+
+Expansion (`services/blockchain/expansion.ts`) mirrors the pure engine's
+contract against live data: bounded hops, a node ceiling, at most six
+counterparties per address, no revisits, regulated services treated as
+terminal, and each parent's traced value distributed across counterparties in
+proportion to the value actually observed on those edges — value is never
+invented. Ranking, signal detection and risk scoring stay in the pure engine,
+so analysis is identical whichever provider produced the graph.
+
+A live-provider failure mid-trace degrades to the synthetic trace rather than
+failing the investigation, and every investigation records `dataSource`
+(`graphsense` | `synthetic`) so nothing is presented as live data when it is
+not.
+
 ## Intelligence engine
 
 `services/intelligence.service.ts` is pure and deterministic — no database, no network — which is what makes it testable and swappable:
@@ -190,6 +238,6 @@ Findings resolved during the audit pass:
 ### Testing
 
 ```bash
-npm test          # 81 tests: transport, validation, security, redaction, auth guards, intelligence engine
+npm test          # 104 tests: transport, validation, security, redaction, auth guards, intelligence engine, GraphSense adapter
 npm run typecheck
 ```
