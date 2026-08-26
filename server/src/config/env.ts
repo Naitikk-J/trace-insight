@@ -22,10 +22,9 @@ const envSchema = z
 
     // GraphSense (chain data). Absent URL = deterministic synthetic provider.
     GRAPHSENSE_API_URL: z
-      .string()
-      .url("GRAPHSENSE_API_URL must be an absolute http(s) URL")
-      .optional(),
-    GRAPHSENSE_API_KEY: z.string().min(1).optional(),
+      .preprocess((v) => (v === "" ? undefined : v), z.string().url("GRAPHSENSE_API_URL must be an absolute http(s) URL").optional()),
+    GRAPHSENSE_API_KEY: z
+      .preprocess((v) => (v === "" ? undefined : v), z.string().min(1).optional()),
     GRAPHSENSE_TIMEOUT_MS: z.coerce.number().int().min(1000).max(60_000).default(12_000),
   })
   .superRefine((value, ctx) => {
