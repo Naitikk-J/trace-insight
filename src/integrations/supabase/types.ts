@@ -19,7 +19,7 @@ export type Database = {
           assigned_to: string | null
           case_ref: string
           created_at: string
-          created_by: string | null
+          created_by: string
           description: string | null
           id: string
           jurisdiction: string | null
@@ -33,7 +33,7 @@ export type Database = {
           assigned_to?: string | null
           case_ref: string
           created_at?: string
-          created_by?: string | null
+          created_by?: string
           description?: string | null
           id?: string
           jurisdiction?: string | null
@@ -47,7 +47,7 @@ export type Database = {
           assigned_to?: string | null
           case_ref?: string
           created_at?: string
-          created_by?: string | null
+          created_by?: string
           description?: string | null
           id?: string
           jurisdiction?: string | null
@@ -61,7 +61,7 @@ export type Database = {
       }
       evidence: {
         Row: {
-          added_by: string | null
+          added_by: string
           attachment_url: string | null
           case_id: string | null
           created_at: string
@@ -77,7 +77,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
-          added_by?: string | null
+          added_by?: string
           attachment_url?: string | null
           case_id?: string | null
           created_at?: string
@@ -93,7 +93,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
-          added_by?: string | null
+          added_by?: string
           attachment_url?: string | null
           case_id?: string | null
           created_at?: string
@@ -137,7 +137,7 @@ export type Database = {
           case_id: string | null
           confidence: number
           created_at: string
-          created_by: string | null
+          created_by: string
           description: string | null
           finding_ref: string
           finding_type: string | null
@@ -153,7 +153,7 @@ export type Database = {
           case_id?: string | null
           confidence?: number
           created_at?: string
-          created_by?: string | null
+          created_by?: string
           description?: string | null
           finding_ref: string
           finding_type?: string | null
@@ -169,7 +169,7 @@ export type Database = {
           case_id?: string | null
           confidence?: number
           created_at?: string
-          created_by?: string | null
+          created_by?: string
           description?: string | null
           finding_ref?: string
           finding_type?: string | null
@@ -204,7 +204,7 @@ export type Database = {
           case_id: string
           completed_at: string | null
           created_at: string
-          created_by: string | null
+          created_by: string
           description: string | null
           id: string
           investigation_ref: string
@@ -223,7 +223,7 @@ export type Database = {
           case_id: string
           completed_at?: string | null
           created_at?: string
-          created_by?: string | null
+          created_by?: string
           description?: string | null
           id?: string
           investigation_ref: string
@@ -242,7 +242,7 @@ export type Database = {
           case_id?: string
           completed_at?: string | null
           created_at?: string
-          created_by?: string | null
+          created_by?: string
           description?: string | null
           id?: string
           investigation_ref?: string
@@ -300,7 +300,7 @@ export type Database = {
         Row: {
           case_id: string | null
           created_at: string
-          created_by: string | null
+          created_by: string
           id: string
           investigation_id: string | null
           notes: string | null
@@ -313,7 +313,7 @@ export type Database = {
         Insert: {
           case_id?: string | null
           created_at?: string
-          created_by?: string | null
+          created_by?: string
           id?: string
           investigation_id?: string | null
           notes?: string | null
@@ -326,7 +326,7 @@ export type Database = {
         Update: {
           case_id?: string | null
           created_at?: string
-          created_by?: string | null
+          created_by?: string
           id?: string
           investigation_id?: string | null
           notes?: string | null
