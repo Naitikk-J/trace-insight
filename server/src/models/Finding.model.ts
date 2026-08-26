@@ -17,7 +17,7 @@ export type FindingSeverity = (typeof FINDING_SEVERITIES)[number];
 export type FindingCategory = (typeof FINDING_CATEGORIES)[number];
 
 export interface FindingDoc extends Document {
-  _id: unknown;
+  _id: Types.ObjectId;
   case: Types.ObjectId;
   investigation?: Types.ObjectId;
   title: string;

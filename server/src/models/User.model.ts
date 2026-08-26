@@ -3,7 +3,7 @@ import { Schema, model, type Document, type Model } from "mongoose";
 import type { AppRole } from "../types/express";
 
 export interface UserDoc extends Document {
-  _id: unknown;
+  _id: Types.ObjectId;
   email: string;
   name: string;
   /** Never selected by default — must be requested explicitly. */

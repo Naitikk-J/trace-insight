@@ -7,7 +7,7 @@ export type CaseStatus = (typeof CASE_STATUSES)[number];
 export type CasePriority = (typeof CASE_PRIORITIES)[number];
 
 export interface CaseDoc extends Document {
-  _id: unknown;
+  _id: Types.ObjectId;
   reference: string;
   title: string;
   summary?: string;

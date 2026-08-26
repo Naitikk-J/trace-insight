@@ -12,7 +12,7 @@ export const EVIDENCE_KINDS = [
 export type EvidenceKind = (typeof EVIDENCE_KINDS)[number];
 
 export interface EvidenceDoc extends Document {
-  _id: unknown;
+  _id: Types.ObjectId;
   case: Types.ObjectId;
   investigation?: Types.ObjectId;
   finding?: Types.ObjectId;

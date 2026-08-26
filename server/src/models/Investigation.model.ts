@@ -36,7 +36,7 @@ export interface GraphEdge {
 }
 
 export interface InvestigationDoc extends Document {
-  _id: unknown;
+  _id: Types.ObjectId;
   reference: string;
   case: Types.ObjectId;
   title: string;
