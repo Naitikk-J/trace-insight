@@ -54,15 +54,16 @@ export function ChapterCopy({ chapter }: { chapter: Chapter }) {
         {chapterNumber(chapter)} / {chapter.label}
       </span>
 
-      <h2 className="max-w-full">
+      <h2 className="max-w-full text-pretty [text-wrap:balance]">
         {o.lines.map((line, i) => (
           <span
             key={line}
             className={cn(
-              "block font-semibold leading-[1.02] tracking-[-0.03em] text-foreground transition-all duration-[900ms] ease-out",
+              // Mobile: slightly looser leading so descenders never clip the next line.
+              "block font-semibold leading-[1.1] tracking-[-0.02em] text-foreground transition-all duration-[900ms] ease-out md:leading-[1.02] md:tracking-[-0.03em]",
               o.align === "center"
-                ? "text-[clamp(1.65rem,3vw,3rem)]"
-                : "text-[clamp(1.75rem,3.8vw,3.75rem)]",
+                ? "text-[clamp(1.5rem,6.4vw,3rem)] md:text-[clamp(1.65rem,3vw,3rem)]"
+                : "text-[clamp(1.6rem,7vw,3.75rem)] md:text-[clamp(1.75rem,3.8vw,3.75rem)]",
               shown ? "opacity-100 blur-0" : "translate-y-6 opacity-0 blur-sm",
             )}
             style={{ transitionDelay: `${120 + i * 110}ms` }}
@@ -73,15 +74,15 @@ export function ChapterCopy({ chapter }: { chapter: Chapter }) {
       </h2>
 
       {o.lines2 ? (
-        <h3 className="max-w-full">
+        <h3 className="max-w-full text-pretty [text-wrap:balance]">
           {o.lines2.map((line, i) => (
             <span
               key={line}
               className={cn(
-                "block font-light leading-[1.1] tracking-[-0.02em] text-muted-foreground transition-all duration-[900ms] ease-out",
+                "block font-light leading-[1.25] tracking-[-0.01em] text-muted-foreground transition-all duration-[900ms] ease-out md:leading-[1.1] md:tracking-[-0.02em]",
                 o.align === "center"
-                  ? "text-[clamp(1.1rem,1.8vw,1.75rem)]"
-                  : "text-[clamp(1.2rem,2.2vw,2rem)]",
+                  ? "text-[clamp(1rem,4.2vw,1.75rem)] md:text-[clamp(1.1rem,1.8vw,1.75rem)]"
+                  : "text-[clamp(1.05rem,4.6vw,2rem)] md:text-[clamp(1.2rem,2.2vw,2rem)]",
                 shown ? "opacity-100 blur-0" : "translate-y-6 opacity-0 blur-sm",
               )}
               style={{ transitionDelay: `${420 + i * 110}ms` }}
@@ -95,7 +96,7 @@ export function ChapterCopy({ chapter }: { chapter: Chapter }) {
       {o.note ? (
         <p
           className={cn(
-            "max-w-sm text-xs leading-relaxed text-muted-foreground/80 transition-all duration-700 md:text-sm",
+            "max-w-[38ch] text-pretty text-[0.8125rem] leading-[1.65] text-muted-foreground/80 transition-all duration-700 sm:max-w-sm md:text-sm md:leading-relaxed",
             shown ? "opacity-100" : "translate-y-4 opacity-0",
           )}
           style={{ transitionDelay: "700ms" }}
@@ -107,8 +108,8 @@ export function ChapterCopy({ chapter }: { chapter: Chapter }) {
       {o.bullets ? (
         <ul
           className={cn(
-            "flex max-w-full flex-col gap-2 transition-all duration-700",
-            o.align === "right" ? "items-end" : "items-start",
+            "flex max-w-full flex-col gap-2.5 transition-all duration-700 md:gap-2",
+            o.align === "right" ? "items-start md:items-end" : "items-start",
             shown ? "opacity-100" : "translate-y-4 opacity-0",
           )}
           style={{ transitionDelay: "780ms" }}
@@ -117,10 +118,11 @@ export function ChapterCopy({ chapter }: { chapter: Chapter }) {
             <li
               key={b}
               className={cn(
-                "flex max-w-sm items-start gap-2.5 text-[11px] leading-snug text-muted-foreground/85 md:text-xs",
-                o.align === "right" ? "flex-row-reverse text-right" : "",
+                "flex max-w-[38ch] items-start gap-2.5 text-pretty text-[0.75rem] leading-[1.55] text-muted-foreground/85 sm:max-w-sm md:text-xs md:leading-snug",
+                o.align === "right" ? "md:flex-row-reverse md:text-right" : "",
               )}
             >
+
               <span className="mt-[0.45em] h-1 w-1 shrink-0 rounded-full bg-primary/80 shadow-[0_0_10px_var(--primary)]" />
               <span>{b}</span>
             </li>
