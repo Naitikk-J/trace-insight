@@ -80,54 +80,67 @@ export function DataFragment({
   );
 }
 
-/** Large transparent world typography — used for the filtering counters. */
+/**
+ * Large transparent world typography — used for the filtering counters.
+ * Opacity is driven from a ref written in the render loop, so counting through
+ * 1000 → 1 costs no React renders.
+ */
 export function WorldNumber({
   position,
   value,
   caption,
-  opacity,
+  opacityRef,
   size = 14,
 }: {
   position: Vec3;
   value: string;
   caption: string;
-  opacity: number;
+  opacityRef: React.MutableRefObject<number>;
   size?: number;
 }) {
+  const group = useRef<THREE.Group>(null);
   const a = useRef<THREE.Mesh>(null);
   const b = useRef<THREE.Mesh>(null);
 
   useFrame(() => {
-    for (const r of [a, b]) {
-      if (!r.current) continue;
-      const m = r.current.material as THREE.Material;
+    const o = opacityRef.current;
+    if (group.current) group.current.visible = o > 0.01;
+    if (a.current) {
+      const m = a.current.material as THREE.Material;
       m.transparent = true;
-      m.opacity = r === a ? opacity * 0.5 : opacity * 0.75;
+      m.opacity = o * 0.55;
+    }
+    if (b.current) {
+      const m = b.current.material as THREE.Material;
+      m.transparent = true;
+      m.opacity = o * 0.8;
     }
   });
 
   return (
-    <Billboard position={position}>
-      <Text
-        ref={a}
-        fontSize={size}
-        color="#eaf2ff"
-        anchorX="center"
-        anchorY="middle"
-      >
-        {value}
-      </Text>
-      <Text
-        ref={b}
-        position={[0, -size * 0.72, 0]}
-        fontSize={size * 0.16}
-        color="#6e8cff"
-        letterSpacing={0.35}
-        anchorX="center"
-        anchorY="middle"
-      >
-        {caption}
-      </Text>
-    </Billboard>
+    <group ref={group}>
+      <Billboard position={position}>
+        <Text
+          ref={a}
+          fontSize={size}
+          color="#eaf2ff"
+          anchorX="center"
+          anchorY="middle"
+        >
+          {value}
+        </Text>
+        <Text
+          ref={b}
+          position={[0, -size * 0.72, 0]}
+          fontSize={size * 0.16}
+          color="#6e8cff"
+          letterSpacing={0.35}
+          anchorX="center"
+          anchorY="middle"
+        >
+          {caption}
+        </Text>
+      </Billboard>
+    </group>
   );
 }
