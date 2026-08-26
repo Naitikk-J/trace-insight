@@ -16,6 +16,7 @@ import {
   FinalCta,
   TopRightAuth,
 } from "@/components/landing/StoryOverlay";
+import { useLenis } from "@/hooks/useLenis";
 import { useStoryProgress } from "@/hooks/useStoryProgress";
 
 const LandingCanvas = lazy(() => import("@/components/landing/LandingCanvas"));
@@ -45,6 +46,7 @@ export const Route = createFileRoute("/")({
 function Landing() {
   const track = useRef<HTMLDivElement>(null);
   const { chapter, progress } = useStoryProgress(track);
+  const lenis = useLenis();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => setMounted(true), []);
@@ -53,8 +55,10 @@ function Landing() {
     const el = track.current;
     if (!el) return;
     const total = el.offsetHeight - window.innerHeight;
-    window.scrollTo({ top: el.offsetTop + total * at, behavior: "smooth" });
-  }, []);
+    const top = el.offsetTop + total * at;
+    if (lenis.current) lenis.current.scrollTo(top, { duration: 2.1 });
+    else window.scrollTo({ top, behavior: "smooth" });
+  }, [lenis]);
 
   return (
     <main className="relative bg-background text-foreground">
