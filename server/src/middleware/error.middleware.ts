@@ -87,11 +87,18 @@ export function errorHandler(
   const { statusCode, message, errors } = normalize(error);
 
   if (statusCode >= 500) {
-    console.error(`[VASPTRACE] ${req.method} ${req.originalUrl} failed:`, error);
+    logger.error("unhandled request error", {
+      requestId: req.requestId,
+      method: req.method,
+      path: req.originalUrl.split("?")[0],
+      reason: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+    });
   }
 
-  const stack =
-    !env.isProduction && error instanceof Error ? error.stack : undefined;
+  // Stack traces leak file paths and dependency internals: development only,
+  // never in test or production responses.
+  const stack = env.isDevelopment && error instanceof Error ? error.stack : undefined;
 
   sendError(res, statusCode, message, errors, stack);
 }
