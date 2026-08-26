@@ -148,29 +148,38 @@ export function RevealScene({ lite }: { lite: boolean }) {
         />
       </mesh>
 
-      <Billboard position={[0, 0, Z + 12]}>
+      <Billboard position={[0, 0, Z + 14]}>
         <Text
           ref={word}
           fontSize={5.4}
           letterSpacing={0.42}
-          color="#eaf2ff"
+          color="#ffffff"
+          outlineWidth={0.16}
+          outlineColor="#06070a"
+          outlineOpacity={0.85}
           anchorX="center"
           anchorY="middle"
+          renderOrder={10}
         >
           TRACIFY
         </Text>
         <Text
           ref={tag}
-          position={[0, -4.6, 0]}
-          fontSize={0.86}
-          letterSpacing={0.3}
-          color="#8b7cff"
+          position={[0, -4.8, 0]}
+          fontSize={1.05}
+          letterSpacing={0.32}
+          color="#cfd8ff"
+          outlineWidth={0.05}
+          outlineColor="#06070a"
+          outlineOpacity={0.9}
           anchorX="center"
           anchorY="middle"
+          renderOrder={10}
         >
           CLARITY IN THE CHAIN
         </Text>
       </Billboard>
+
     </group>
   );
 }
