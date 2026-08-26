@@ -15,12 +15,15 @@ import {
 import { story } from "@/three/utils/storyState";
 import { cn } from "@/lib/utils";
 
+// On mobile every chapter uses one calm left-aligned column — mixed
+// alignments wrap badly in a narrow measure. Alignment only varies from md up.
 const ALIGN = {
   left: "items-start text-left md:left-[6vw] md:right-auto",
   center:
-    "items-center text-center md:left-1/2 md:right-auto md:top-[12vh] md:bottom-auto md:h-auto md:-translate-x-1/2 md:justify-start",
-  right: "items-end text-right md:left-auto md:right-[15vw]",
+    "items-start text-left md:items-center md:text-center md:left-1/2 md:right-auto md:top-[12vh] md:bottom-auto md:h-auto md:-translate-x-1/2 md:justify-start",
+  right: "items-start text-left md:items-end md:text-right md:left-auto md:right-[15vw]",
 } as const;
+
 
 export function ChapterCopy({ chapter }: { chapter: Chapter }) {
   const o = chapter.overlay;
