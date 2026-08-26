@@ -11,9 +11,10 @@ import { story } from "@/three/utils/storyState";
 import { cn } from "@/lib/utils";
 
 const ALIGN = {
-  left: "items-start text-left md:left-[7vw] md:right-auto",
-  center: "items-center text-center md:left-1/2 md:right-auto md:top-[14vh] md:-translate-x-1/2",
-  right: "items-end text-right md:left-auto md:right-[10vw]",
+  left: "items-start text-left md:left-[6vw] md:right-auto",
+  center:
+    "items-center text-center md:left-1/2 md:right-auto md:top-[12vh] md:bottom-auto md:h-auto md:-translate-x-1/2 md:justify-start",
+  right: "items-end text-right md:left-auto md:right-[15vw]",
 } as const;
 
 export function ChapterCopy({ chapter }: { chapter: Chapter }) {
@@ -31,7 +32,7 @@ export function ChapterCopy({ chapter }: { chapter: Chapter }) {
   return (
     <div
       className={cn(
-        "pointer-events-none fixed inset-x-5 bottom-24 top-24 z-20 flex max-w-[calc(100vw-2.5rem)] flex-col justify-center gap-3 md:inset-y-[18vh] md:w-[min(42vw,42rem)] md:max-w-none md:gap-5",
+        "pointer-events-none fixed inset-x-5 bottom-24 top-24 z-20 flex max-w-[calc(100vw-2.5rem)] flex-col justify-center gap-3 md:inset-y-[20vh] md:w-[min(36vw,34rem)] md:max-w-none md:gap-5",
         ALIGN[o.align],
       )}
     >
@@ -49,7 +50,10 @@ export function ChapterCopy({ chapter }: { chapter: Chapter }) {
           <span
             key={line}
             className={cn(
-              "block text-[clamp(1.75rem,4.2vw,4rem)] font-semibold leading-[1.02] tracking-[-0.03em] text-foreground transition-all duration-[900ms] ease-out",
+              "block font-semibold leading-[1.02] tracking-[-0.03em] text-foreground transition-all duration-[900ms] ease-out",
+              o.align === "center"
+                ? "text-[clamp(1.65rem,3vw,3rem)]"
+                : "text-[clamp(1.75rem,3.8vw,3.75rem)]",
               shown ? "opacity-100 blur-0" : "translate-y-6 opacity-0 blur-sm",
             )}
             style={{ transitionDelay: `${120 + i * 110}ms` }}
@@ -65,7 +69,10 @@ export function ChapterCopy({ chapter }: { chapter: Chapter }) {
             <span
               key={line}
               className={cn(
-                "block text-[clamp(1.2rem,2.5vw,2.25rem)] font-light leading-[1.1] tracking-[-0.02em] text-muted-foreground transition-all duration-[900ms] ease-out",
+                "block font-light leading-[1.1] tracking-[-0.02em] text-muted-foreground transition-all duration-[900ms] ease-out",
+                o.align === "center"
+                  ? "text-[clamp(1.1rem,1.8vw,1.75rem)]"
+                  : "text-[clamp(1.2rem,2.2vw,2rem)]",
                 shown ? "opacity-100 blur-0" : "translate-y-6 opacity-0 blur-sm",
               )}
               style={{ transitionDelay: `${420 + i * 110}ms` }}
@@ -189,7 +196,7 @@ export function FinalCta({ visible }: { visible: boolean }) {
   return (
     <div
       className={cn(
-        "fixed inset-x-0 bottom-[14vh] z-30 flex flex-col items-center gap-6 transition-all duration-1000",
+        "fixed inset-x-0 bottom-[9vh] z-30 flex flex-col items-center gap-4 transition-all duration-1000 md:bottom-[8vh]",
         visible
           ? "pointer-events-auto opacity-100"
           : "pointer-events-none translate-y-6 opacity-0",
