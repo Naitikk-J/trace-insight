@@ -24,6 +24,14 @@ export interface ChapterOverlay {
   note?: string;
   /** Small technical annotations rendered as an investigation side-note. */
   meta?: [string, string][];
+  /** Capability points, rendered as a compact ticked list under the copy. */
+  bullets?: string[];
+  /** Investigation read-out docked in the lane opposite the copy. */
+  panel?: {
+    title: string;
+    rows: [string, string][];
+    footer?: string;
+  };
 }
 
 export interface Chapter {
