@@ -4,6 +4,7 @@ import { ZodError } from "zod";
 import { env } from "../config/env";
 import { ApiError, type ApiErrorDetail } from "../utils/ApiError";
 import { sendError } from "../utils/ApiResponse";
+import { logger } from "../utils/logger";
 
 interface NormalizedError {
   statusCode: number;
