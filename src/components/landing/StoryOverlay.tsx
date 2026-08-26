@@ -375,7 +375,7 @@ export function DepthHud({ progress }: { progress: number }) {
   }, []);
 
   return (
-    <div className="pointer-events-none fixed bottom-6 left-6 z-30 flex items-end gap-6 font-mono text-[10px] tracking-[0.24em] text-muted-foreground/70">
+    <div className="pointer-events-none fixed bottom-6 left-6 z-30 flex items-end gap-6 font-mono text-[10px] tracking-[0.24em] text-muted-foreground/70 md:bottom-12">
       <div className="flex flex-col gap-1">
         <span className="text-muted-foreground/40">DEPTH</span>
         <span className="text-foreground/80">−{depth} Z</span>
