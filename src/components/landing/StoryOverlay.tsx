@@ -6,7 +6,12 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 
-import { CHAPTERS, chapterNumber, type Chapter } from "@/three/utils/storyConfig";
+import {
+  CHAPTERS,
+  chapterAt,
+  chapterNumber,
+  type Chapter,
+} from "@/three/utils/storyConfig";
 import { story } from "@/three/utils/storyState";
 import { cn } from "@/lib/utils";
 
