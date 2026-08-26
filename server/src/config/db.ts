@@ -1,65 +1,49 @@
 import mongoose from "mongoose";
 import { env } from "./env";
+import { logger } from "../utils/logger";
 
-mongoose.set("strictQuery", true);
+type DbState = "connected" | "connecting" | "disconnected" | "disconnecting";
 
-let connecting: Promise<typeof mongoose> | null = null;
+const STATES: Record<number, DbState> = {
+  0: "disconnected",
+  1: "connected",
+  2: "connecting",
+  3: "disconnecting",
+};
 
-/**
- * Connect to MongoDB. Rejects on failure so the caller can abort startup —
- * the API must never silently run without a database.
- */
-export async function connectDatabase(): Promise<typeof mongoose> {
-  if (mongoose.connection.readyState === 1) return mongoose;
-  if (connecting) return connecting;
+/** Current connection state, used by the readiness probe. */
+export function databaseState(): DbState {
+  return STATES[mongoose.connection.readyState] ?? "disconnected";
+}
 
-  connecting = mongoose
-    .connect(env.MONGODB_URI, {
-      serverSelectionTimeoutMS: 10_000,
-      autoIndex: !env.isProduction,
-    })
-    .then((conn) => {
-      const { host, name } = conn.connection;
-      console.log(`[VASPTRACE] MongoDB connected — host=${host} db=${name}`);
-      return conn;
-    })
-    .catch((error: unknown) => {
-      connecting = null;
-      const message = error instanceof Error ? error.message : String(error);
-      throw new Error(`MongoDB connection failed: ${message}`);
-    });
+export async function connectDatabase(): Promise<void> {
+  // Fail fast rather than queueing writes against a database that is not there.
+  mongoose.set("strictQuery", true);
+  mongoose.set("sanitizeFilter", true);
+  mongoose.set("bufferCommands", false);
 
-  mongoose.connection.on("error", (error) => {
-    console.error("[VASPTRACE] MongoDB error:", error.message);
-  });
   mongoose.connection.on("disconnected", () => {
-    console.warn("[VASPTRACE] MongoDB disconnected");
+    logger.warn("database disconnected");
   });
   mongoose.connection.on("reconnected", () => {
-    console.log("[VASPTRACE] MongoDB reconnected");
+    logger.info("database reconnected");
+  });
+  mongoose.connection.on("error", (error: Error) => {
+    logger.error("database error", { reason: error.message });
   });
 
-  return connecting;
+  await mongoose.connect(env.MONGODB_URI, {
+    serverSelectionTimeoutMS: 8_000,
+    socketTimeoutMS: 45_000,
+    maxPoolSize: 20,
+    minPoolSize: 2,
+    retryWrites: true,
+  });
+
+  logger.info("database connected", { host: mongoose.connection.host });
 }
 
 export async function disconnectDatabase(): Promise<void> {
-  if (mongoose.connection.readyState === 0) return;
+  if (databaseState() === "disconnected") return;
   await mongoose.disconnect();
-  connecting = null;
-  console.log("[VASPTRACE] MongoDB connection closed");
-}
-
-export function databaseState(): "disconnected" | "connected" | "connecting" | "disconnecting" | "unknown" {
-  switch (mongoose.connection.readyState) {
-    case 0:
-      return "disconnected";
-    case 1:
-      return "connected";
-    case 2:
-      return "connecting";
-    case 3:
-      return "disconnecting";
-    default:
-      return "unknown";
-  }
 }

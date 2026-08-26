@@ -139,3 +139,26 @@ Handled centrally: Zod and Mongoose validation errors, duplicate keys (409), inv
 - **D** — Investigation model, CRUD, `GET /api/cases/:caseId/investigations`
 - **E** — Findings, Evidence, Reports
 - **F** — `services/blockchain/` provider abstractions, seed script, frontend API client wiring
+
+## Security & production-readiness audit
+
+Findings resolved during the audit pass:
+
+| Area | Issue found | Fix |
+| --- | --- | --- |
+| Authorization (data layer) | Demo rows had no owner, so any signed-in investigator could update/delete them (IDOR) | Backfilled owners, added `NOT NULL` + owner defaults, recreated update/delete policies with owner-or-admin `WITH CHECK` |
+| Error responses | Stack traces were returned outside production (including test) | Stacks are now development-only; 5xx details go to structured logs |
+| Transport hardening | No security headers, no rate limiting | `helmet` (strict CSP, no-referrer, HSTS in prod), global + auth + heavy + upload rate limiters |
+| NoSQL injection | Mongo operators could reach query filters | Request scrubber strips `$`/dotted/prototype keys; mongoose `sanitizeFilter` + `strictQuery` |
+| Input validation | No shared contract | `validate()` Zod middleware for body/params/query, strict objects, whitelisted sort fields, bounded pagination |
+| Logging | Risk of credential leakage | Structured JSON logger with key redaction and correlation ids |
+| Availability | Single health endpoint; abrupt shutdown | `/api/health` liveness + `/api/health/ready` readiness (503 when DB down/draining), connection draining, socket timeouts, resilient rejection handling |
+| Payloads | Unbounded bodies, raw JSON parse errors | 512kb limit, controlled 400/413 responses |
+| CORS | Permissive by default | Explicit origin allowlist; wildcard/localhost origins rejected in production |
+
+### Testing
+
+```bash
+npm test          # 40 transport, validation, security and redaction tests
+npm run typecheck
+```

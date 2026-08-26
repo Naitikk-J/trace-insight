@@ -2,41 +2,79 @@ import type { Server } from "node:http";
 import { createApp } from "./app";
 import { connectDatabase, disconnectDatabase } from "./config/db";
 import { env } from "./config/env";
+import { beginShutdown, isShuttingDown } from "./lifecycle";
+import { logger } from "./utils/logger";
+
+const SHUTDOWN_GRACE_MS = 15_000;
 
 async function bootstrap(): Promise<void> {
   try {
     await connectDatabase();
   } catch (error) {
-    console.error(
-      `[VASPTRACE] Startup aborted — ${error instanceof Error ? error.message : String(error)}`,
-    );
+    logger.error("startup aborted", {
+      reason: error instanceof Error ? error.message : String(error),
+    });
     process.exit(1);
   }
 
   const app = createApp();
   const server: Server = app.listen(env.PORT, () => {
-    console.log(
-      `[VASPTRACE] API listening on http://localhost:${env.PORT}/api (env=${env.NODE_ENV})`,
-    );
+    logger.info("api listening", { port: env.PORT, env: env.NODE_ENV });
   });
 
-  const shutdown = (signal: string) => {
-    console.log(`[VASPTRACE] ${signal} received — shutting down`);
+  // Guard against slowloris-style socket hoarding.
+  server.headersTimeout = 20_000;
+  server.requestTimeout = 30_000;
+  server.keepAliveTimeout = 10_000;
+
+  let exiting = false;
+
+  const shutdown = (signal: string, code = 0) => {
+    if (exiting) return;
+    exiting = true;
+    beginShutdown();
+    logger.warn("shutdown started", { signal });
+
+    // Readiness now reports draining; stop accepting new connections and let
+    // in-flight requests finish before closing the database.
     server.close(() => {
-      void disconnectDatabase().finally(() => process.exit(0));
+      void disconnectDatabase()
+        .catch((error: unknown) => {
+          logger.error("database close failed", {
+            reason: error instanceof Error ? error.message : String(error),
+          });
+        })
+        .finally(() => {
+          logger.info("shutdown complete", { signal });
+          process.exit(code);
+        });
     });
-    // Don't hang forever on stuck connections.
-    setTimeout(() => process.exit(1), 10_000).unref();
+
+    server.closeIdleConnections?.();
+
+    setTimeout(() => {
+      logger.error("shutdown timed out — forcing exit", { signal });
+      server.closeAllConnections?.();
+      process.exit(1);
+    }, SHUTDOWN_GRACE_MS).unref();
   };
 
   process.on("SIGINT", () => shutdown("SIGINT"));
   process.on("SIGTERM", () => shutdown("SIGTERM"));
+
+  // A rejected promise that escaped a handler is a bug, not a reason to die:
+  // log it with context and keep serving traffic.
   process.on("unhandledRejection", (reason) => {
-    console.error("[VASPTRACE] Unhandled rejection:", reason);
+    logger.error("unhandled rejection", {
+      reason: reason instanceof Error ? reason.message : String(reason),
+    });
   });
+
+  // An uncaught exception leaves the process in an unknown state — drain and
+  // exit non-zero so the supervisor restarts a clean instance.
   process.on("uncaughtException", (error) => {
-    console.error("[VASPTRACE] Uncaught exception:", error);
-    shutdown("uncaughtException");
+    logger.error("uncaught exception", { reason: error.message, stack: error.stack });
+    if (!isShuttingDown()) shutdown("uncaughtException", 1);
   });
 }
 

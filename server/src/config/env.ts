@@ -5,23 +5,48 @@ import { z } from "zod";
 // Load server/.env regardless of the cwd the process was started from.
 dotenv.config({ path: path.resolve(__dirname, "../../.env") });
 
-const envSchema = z.object({
-  PORT: z.coerce.number().int().positive().default(5000),
-  NODE_ENV: z
-    .enum(["development", "test", "production"])
-    .default("development"),
-  MONGODB_URI: z
-    .string()
-    .min(1, "MONGODB_URI is required")
-    .refine((v) => v.startsWith("mongodb://") || v.startsWith("mongodb+srv://"), {
-      message: "MONGODB_URI must be a mongodb:// or mongodb+srv:// connection string",
-    }),
-  JWT_SECRET: z
-    .string()
-    .min(24, "JWT_SECRET must be at least 24 characters long"),
-  JWT_EXPIRES_IN: z.string().min(1).default("7d"),
-  CLIENT_URL: z.string().min(1).default("http://localhost:5173"),
-});
+const envSchema = z
+  .object({
+    PORT: z.coerce.number().int().positive().max(65535).default(5000),
+    HOST: z.string().min(1).default("0.0.0.0"),
+    NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
+    MONGODB_URI: z
+      .string()
+      .min(1, "MONGODB_URI is required")
+      .refine((v) => v.startsWith("mongodb://") || v.startsWith("mongodb+srv://"), {
+        message: "MONGODB_URI must be a mongodb:// or mongodb+srv:// connection string",
+      }),
+    JWT_SECRET: z.string().min(24, "JWT_SECRET must be at least 24 characters long"),
+    JWT_EXPIRES_IN: z.string().min(1).default("7d"),
+    CLIENT_URL: z.string().min(1).default("http://localhost:5173"),
+  })
+  .superRefine((value, ctx) => {
+    if (value.NODE_ENV !== "production") return;
+
+    // Production-only configuration mistakes are caught before the first request.
+    const origins = value.CLIENT_URL.split(",").map((o) => o.trim());
+    if (origins.some((o) => o === "*" )) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["CLIENT_URL"],
+        message: "Wildcard CORS is not allowed in production — list explicit origins",
+      });
+    }
+    if (origins.some((o) => o.includes("localhost") || o.includes("127.0.0.1"))) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["CLIENT_URL"],
+        message: "Production CLIENT_URL must not point at localhost",
+      });
+    }
+    if (/^(dev|test|change|secret|password)/i.test(value.JWT_SECRET)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["JWT_SECRET"],
+        message: "JWT_SECRET looks like a placeholder — use a long random value",
+      });
+    }
+  });
 
 const parsed = envSchema.safeParse(process.env);
 
