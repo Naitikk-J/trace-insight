@@ -27,12 +27,15 @@ const SLABS: { x: number; y: number; z: number; label: string }[] = [
 
 export function EvidenceScene() {
   const group = useRef<THREE.Group>(null);
+  const labels = useRef<THREE.Group>(null);
 
   useFrame((state) => {
     const p = story.progress;
     const t = state.clock.elapsedTime;
     // Clears out before the convergence so nothing overlaps the final mark.
     const alive = ramp(p, 0.9, 0.94) * (1 - ramp(p, 0.945, 0.962));
+    // Labels clear the frame before the convergence so nothing overlaps the mark.
+    if (labels.current) labels.current.visible = p > 0.885 && p < 0.945;
     const g = group.current;
     if (!g) return;
     g.visible = alive > 0.02;
@@ -86,6 +89,7 @@ export function EvidenceScene() {
         ))}
       </group>
 
+      <group ref={labels}>
       {SLABS.map((s) => (
         <DataFragment
           key={s.label}
@@ -98,6 +102,7 @@ export function EvidenceScene() {
           plane={false}
         />
       ))}
+      </group>
     </group>
   );
 }
