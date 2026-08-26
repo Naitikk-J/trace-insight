@@ -78,31 +78,36 @@ export function RevealScene({ lite }: { lite: boolean }) {
     }
     geom.attributes["position"]!.needsUpdate = true;
 
+    // Legibility: once the wordmark starts resolving, the particle field and
+    // wireframe recede so the type is never competing with additive noise.
+    const type = ramp(p, 0.95, 0.985);
     if (points.current) {
       points.current.visible = alive > 0.01;
       (points.current.material as THREE.PointsMaterial).opacity =
-        alive * (0.4 + 0.6 * converge);
+        alive * (0.4 + 0.6 * converge) * (1 - 0.65 * type);
     }
     if (rings.current) {
       rings.current.rotation.z += delta * 0.05;
       rings.current.children.forEach((c, i) => {
         const m = (c as THREE.Mesh).material as THREE.MeshBasicMaterial;
-        m.opacity = converge * (0.28 - i * 0.05);
+        m.opacity = converge * (0.28 - i * 0.05) * (1 - 0.5 * type);
         c.rotation.z -= delta * 0.03 * (i + 1);
       });
     }
     if (mark.current) {
       mark.current.rotation.z += delta * 0.08;
       (mark.current.material as THREE.MeshBasicMaterial).opacity =
-        converge * 0.5 * (0.8 + 0.2 * Math.sin(t * 1.4));
+        converge * 0.32 * (1 - 0.6 * type) * (0.8 + 0.2 * Math.sin(t * 1.4));
     }
     for (const r of [word, tag]) {
       if (!r.current) continue;
       const m = r.current.material as THREE.Material;
       m.transparent = true;
-      m.opacity = ramp(p, 0.972, 1) * (r === word ? 1 : 0.65);
+      m.depthWrite = false;
+      m.opacity = type * (r === word ? 1 : 0.9);
     }
   });
+
 
   return (
     <group>
