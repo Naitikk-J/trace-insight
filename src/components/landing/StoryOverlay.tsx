@@ -100,6 +100,30 @@ export function ChapterCopy({ chapter }: { chapter: Chapter }) {
         </p>
       ) : null}
 
+      {o.bullets ? (
+        <ul
+          className={cn(
+            "flex max-w-full flex-col gap-2 transition-all duration-700",
+            o.align === "right" ? "items-end" : "items-start",
+            shown ? "opacity-100" : "translate-y-4 opacity-0",
+          )}
+          style={{ transitionDelay: "780ms" }}
+        >
+          {o.bullets.map((b) => (
+            <li
+              key={b}
+              className={cn(
+                "flex max-w-sm items-start gap-2.5 text-[11px] leading-snug text-muted-foreground/85 md:text-xs",
+                o.align === "right" ? "flex-row-reverse text-right" : "",
+              )}
+            >
+              <span className="mt-[0.45em] h-1 w-1 shrink-0 rounded-full bg-primary/80 shadow-[0_0_10px_var(--primary)]" />
+              <span>{b}</span>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+
       {o.meta ? (
         <dl
           className={cn(
@@ -107,7 +131,7 @@ export function ChapterCopy({ chapter }: { chapter: Chapter }) {
             o.align === "right" ? "justify-end" : "",
             shown ? "opacity-100" : "translate-y-4 opacity-0",
           )}
-          style={{ transitionDelay: "820ms" }}
+          style={{ transitionDelay: "880ms" }}
         >
           {o.meta.map(([k, v]) => (
             <div key={k} className="flex flex-col gap-1">
@@ -117,6 +141,103 @@ export function ChapterCopy({ chapter }: { chapter: Chapter }) {
           ))}
         </dl>
       ) : null}
+    </div>
+  );
+}
+
+const PANEL_POS = {
+  left: "md:right-[9vw] md:items-start",
+  right: "md:left-[6vw] md:items-start",
+  center: "md:left-[6vw] md:items-start",
+} as const;
+
+/**
+ * Investigation read-out docked opposite the chapter copy. Keeps each chapter
+ * feeling like a live workspace instead of a bare statement.
+ */
+export function ChapterPanel({ chapter }: { chapter: Chapter }) {
+  const panel = chapter.overlay?.panel;
+  const align = chapter.overlay?.align ?? "left";
+  const [shown, setShown] = useState(false);
+
+  useEffect(() => {
+    setShown(false);
+    const id = requestAnimationFrame(() => setShown(true));
+    return () => cancelAnimationFrame(id);
+  }, [chapter.id]);
+
+  if (!panel) return null;
+
+  return (
+    <div
+      className={cn(
+        "pointer-events-none fixed z-20 hidden w-[16rem] flex-col md:flex",
+        align === "center" ? "md:top-[46vh]" : "md:top-[30vh]",
+        PANEL_POS[align],
+      )}
+    >
+      <div
+        className={cn(
+          "rounded-2xl border border-border/50 bg-background/45 p-4 shadow-[0_24px_60px_-30px_rgba(0,0,0,0.9)] backdrop-blur-xl transition-all duration-[900ms] ease-out",
+          shown ? "opacity-100 blur-0" : "translate-y-5 opacity-0 blur-sm",
+        )}
+        style={{ transitionDelay: "560ms" }}
+      >
+        <div className="mb-3 flex items-center justify-between">
+          <span className="font-mono text-[9px] tracking-[0.32em] text-primary/80">
+            {panel.title}
+          </span>
+          <span className="flex items-center gap-1.5 font-mono text-[9px] tracking-[0.2em] text-muted-foreground/50">
+            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary" />
+            LIVE
+          </span>
+        </div>
+        <dl className="flex flex-col gap-2">
+          {panel.rows.map(([k, v]) => (
+            <div
+              key={k}
+              className="flex items-baseline justify-between gap-3 border-b border-border/30 pb-1.5 last:border-0 last:pb-0"
+            >
+              <dt className="font-mono text-[9px] tracking-[0.16em] text-muted-foreground/55">
+                {k}
+              </dt>
+              <dd className="font-mono text-[10px] tracking-[0.06em] text-foreground/85">
+                {v}
+              </dd>
+            </div>
+          ))}
+        </dl>
+        {panel.footer ? (
+          <p className="mt-3 text-[10px] leading-relaxed text-muted-foreground/60">
+            {panel.footer}
+          </p>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
+const TICKER = [
+  "INGEST · ETH · TRON · POLYGON · BTC",
+  "WATCHLIST · 12 HITS",
+  "ENTITY RESOLUTION · 38 ADDRESSES CLUSTERED",
+  "PATH RANKING · 1,000 → 1",
+  "EVIDENCE · CHAIN OF CUSTODY SEALED",
+  "ATTRIBUTION · 0.92 CONFIDENCE",
+];
+
+/** Bottom-edge telemetry strip: constant low-level activity under the story. */
+export function StatusTicker() {
+  return (
+    <div className="pointer-events-none fixed inset-x-0 bottom-0 z-20 hidden h-9 items-center overflow-hidden border-t border-border/30 bg-background/35 backdrop-blur-md md:flex">
+      <div className="flex min-w-max animate-[ticker_38s_linear_infinite] items-center gap-10 px-6 font-mono text-[9px] tracking-[0.28em] text-muted-foreground/50">
+        {[...TICKER, ...TICKER, ...TICKER].map((t, i) => (
+          <span key={`${t}-${i}`} className="flex items-center gap-3">
+            <span className="h-1 w-1 rounded-full bg-primary/60" />
+            {t}
+          </span>
+        ))}
+      </div>
     </div>
   );
 }
@@ -254,7 +375,7 @@ export function DepthHud({ progress }: { progress: number }) {
   }, []);
 
   return (
-    <div className="pointer-events-none fixed bottom-6 left-6 z-30 flex items-end gap-6 font-mono text-[10px] tracking-[0.24em] text-muted-foreground/70">
+    <div className="pointer-events-none fixed bottom-6 left-6 z-30 flex items-end gap-6 font-mono text-[10px] tracking-[0.24em] text-muted-foreground/70 md:bottom-12">
       <div className="flex flex-col gap-1">
         <span className="text-muted-foreground/40">DEPTH</span>
         <span className="text-foreground/80">−{depth} Z</span>

@@ -11,9 +11,11 @@ import { createFileRoute } from "@tanstack/react-router";
 import {
   BrandMark,
   ChapterCopy,
+  ChapterPanel,
   ChapterRail,
   DepthHud,
   FinalCta,
+  StatusTicker,
   TopRightAuth,
 } from "@/components/landing/StoryOverlay";
 import { useLenis } from "@/hooks/useLenis";
@@ -88,8 +90,10 @@ function Landing() {
       <BrandMark />
       <TopRightAuth />
       <ChapterCopy chapter={chapter} />
+      <ChapterPanel chapter={chapter} />
       <ChapterRail chapter={chapter} onJump={jump} />
       <DepthHud progress={progress} />
+      <StatusTicker />
       <FinalCta visible={progress > 0.975} />
 
       {/* Scroll track: pure length. 12 chapters of travel. */}

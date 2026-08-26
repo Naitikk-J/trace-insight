@@ -24,6 +24,14 @@ export interface ChapterOverlay {
   note?: string;
   /** Small technical annotations rendered as an investigation side-note. */
   meta?: [string, string][];
+  /** Capability points, rendered as a compact ticked list under the copy. */
+  bullets?: string[];
+  /** Investigation read-out docked in the lane opposite the copy. */
+  panel?: {
+    title: string;
+    rows: [string, string][];
+    footer?: string;
+  };
 }
 
 export interface Chapter {
@@ -73,6 +81,21 @@ export const CHAPTERS: Chapter[] = [
         ["MODE", "LIVE TRACE"],
         ["DEPTH", "∞"],
       ],
+      bullets: [
+        "Multi-chain ingestion across EVM, TRON and Bitcoin",
+        "Bounded hop tracing with full provenance",
+        "Court-ready evidence from the first click",
+      ],
+      panel: {
+        title: "SESSION",
+        rows: [
+          ["CASE", "CASE-2026-0114"],
+          ["ANALYST", "UNASSIGNED"],
+          ["CHAINS", "ETH · TRON · POLY"],
+          ["STATE", "AWAITING INPUT"],
+        ],
+        footer: "Scroll to begin the trace",
+      },
     },
   },
   {
@@ -87,6 +110,20 @@ export const CHAPTERS: Chapter[] = [
       align: "center",
       lines: ["THE NETWORK", "IS ALREADY MOVING."],
       note: "Blocks settle. Value hops. Nothing waits for an investigator.",
+      meta: [
+        ["BLOCK", "#2,198,432"],
+        ["MEMPOOL", "14,209 TX"],
+      ],
+      panel: {
+        title: "LIVE FEED",
+        rows: [
+          ["THROUGHPUT", "38 TX / SEC"],
+          ["WATCHLIST HITS", "12"],
+          ["NEW ADDRESSES", "1,844"],
+          ["LATENCY", "1.2 S"],
+        ],
+        footer: "Streaming ledger state",
+      },
     },
   },
   {
@@ -106,6 +143,21 @@ export const CHAPTERS: Chapter[] = [
         ["FIELD", "1.4M TRANSFERS"],
         ["CONTEXT", "NONE"],
       ],
+      bullets: [
+        "Normalises every chain into one transfer model",
+        "Deduplicates internal calls and token wrappers",
+        "Indexes counterparties before you ask a question",
+      ],
+      panel: {
+        title: "RAW FIELD",
+        rows: [
+          ["TRANSFERS", "1,412,908"],
+          ["ADDRESSES", "268,441"],
+          ["TOKENS", "94"],
+          ["SIGNAL / NOISE", "0.0004"],
+        ],
+        footer: "Transparency is not clarity",
+      },
     },
   },
   {
@@ -125,6 +177,21 @@ export const CHAPTERS: Chapter[] = [
         ["ADDRESS", "0x8F29…C12"],
         ["SIGNAL", "ANOMALOUS OUTFLOW"],
       ],
+      bullets: [
+        "Behavioural baselines per address, not global rules",
+        "Peeling, layering and structuring detectors",
+        "Every signal carries the evidence that raised it",
+      ],
+      panel: {
+        title: "SIGNAL CARD",
+        rows: [
+          ["FIRST SEEN", "2026-02-11 04:18Z"],
+          ["OUTFLOW BURST", "9 TX / 6 MIN"],
+          ["PEER OVERLAP", "0.81"],
+          ["RISK", "78 / 100"],
+        ],
+        footer: "Anomaly promoted to lead",
+      },
     },
   },
   {
@@ -145,6 +212,21 @@ export const CHAPTERS: Chapter[] = [
         ["HOP", "03 / 06"],
         ["RISK SIGNAL", "HIGH"],
       ],
+      bullets: [
+        "Bounded hop expansion keeps traces defensible",
+        "Value continuity survives swaps and bridges",
+        "Each hop timestamped and source-linked",
+      ],
+      panel: {
+        title: "HOP LEDGER",
+        rows: [
+          ["HOP 01", "VICTIM → 0x8F29"],
+          ["HOP 02", "0x8F29 → 0x41BA"],
+          ["HOP 03", "SPLIT · 4 WAYS"],
+          ["RETAINED VALUE", "86%"],
+        ],
+        footer: "Continuity preserved end to end",
+      },
     },
   },
   {
@@ -160,6 +242,20 @@ export const CHAPTERS: Chapter[] = [
       lines: ["ONE ADDRESS."],
       lines2: ["MANY CONNECTIONS."],
       note: "The linear path was only a thread inside a far larger topology.",
+      meta: [
+        ["NODES IN VIEW", "1,000"],
+        ["EDGES", "3,412"],
+      ],
+      panel: {
+        title: "TOPOLOGY",
+        rows: [
+          ["DEGREE (MAX)", "184"],
+          ["BRIDGES", "6"],
+          ["MIXER TOUCHPOINTS", "2"],
+          ["SUBGRAPHS", "11"],
+        ],
+        footer: "One thread inside a network",
+      },
     },
   },
   {
@@ -179,6 +275,21 @@ export const CHAPTERS: Chapter[] = [
         ["ADDRESSES", "38"],
         ["ENTITY CANDIDATE", "CONFIRMED"],
       ],
+      bullets: [
+        "Co-spend and timing heuristics with confidence scores",
+        "Entity merges are reversible and fully audited",
+        "Cluster-level risk instead of address whack-a-mole",
+      ],
+      panel: {
+        title: "ENTITY",
+        rows: [
+          ["LABEL", "DRAINER-OPS 04"],
+          ["MEMBERS", "38 ADDRESSES"],
+          ["HEURISTIC", "CO-SPEND + TIMING"],
+          ["CONFIDENCE", "0.88"],
+        ],
+        footer: "Every merge is auditable",
+      },
     },
   },
   {
@@ -194,6 +305,16 @@ export const CHAPTERS: Chapter[] = [
       lines: ["DATA TELLS YOU", "WHAT HAPPENED."],
       lines2: ["CONTEXT TELLS YOU", "WHY IT MATTERS."],
       note: "Behaviour, relationships and attribution stack over the raw graph.",
+      panel: {
+        title: "CONTEXT LAYERS",
+        rows: [
+          ["ATTRIBUTION", "14 LABELS"],
+          ["SANCTIONS", "1 MATCH"],
+          ["VICTIM REPORTS", "6 LINKED"],
+          ["OSINT", "3 SOURCES"],
+        ],
+        footer: "Layered over the raw graph",
+      },
     },
   },
   {
@@ -213,6 +334,21 @@ export const CHAPTERS: Chapter[] = [
         ["SERVICE INTERACTION", "DEPOSIT"],
         ["ATTRIBUTION", "0.92 CONFIDENCE"],
       ],
+      bullets: [
+        "Deposit-address attribution with confidence bands",
+        "Jurisdiction and licensing context per service",
+        "Exportable request packs for compliance teams",
+      ],
+      panel: {
+        title: "SERVICE",
+        rows: [
+          ["TYPE", "CENTRALISED VASP"],
+          ["JURISDICTION", "EU · MICA"],
+          ["EXPOSURE", "31,900 USDT"],
+          ["NEXT STEP", "INFO REQUEST"],
+        ],
+        footer: "Where a trace becomes actionable",
+      },
     },
   },
   {
@@ -227,6 +363,22 @@ export const CHAPTERS: Chapter[] = [
       align: "left",
       lines: ["NOT EVERY PATH", "MATTERS."],
       lines2: ["CLARITY", "IS THE ABILITY", "TO IGNORE THE NOISE."],
+      note: "Scoring collapses a thousand candidates into the one path you can defend.",
+      bullets: [
+        "Path ranking by value, risk and hop economy",
+        "Noise suppressed, never deleted — always reversible",
+        "Every score explains itself in plain language",
+      ],
+      panel: {
+        title: "PATH RANKING",
+        rows: [
+          ["CANDIDATES", "1,000 → 1"],
+          ["TOP PATH SCORE", "0.94"],
+          ["HOPS", "6"],
+          ["SUPPRESSED", "993 (RECOVERABLE)"],
+        ],
+        footer: "Prioritised, not hidden",
+      },
     },
   },
   {
@@ -241,6 +393,17 @@ export const CHAPTERS: Chapter[] = [
       align: "center",
       lines: ["A TRACE", "IS NOT A CASE"],
       lines2: ["UNTIL YOU", "CAN EXPLAIN IT."],
+      note: "Findings, exhibits and narrative assemble into one defensible package.",
+      panel: {
+        title: "EVIDENCE PACK",
+        rows: [
+          ["FINDINGS", "6 RECORDED"],
+          ["EXHIBITS", "11 PINNED"],
+          ["CHAIN OF CUSTODY", "SEALED"],
+          ["EXPORT", "PDF · CSV · JSON"],
+        ],
+        footer: "Reproducible by a third party",
+      },
     },
   },
   {
