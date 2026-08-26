@@ -11,9 +11,11 @@ import { createFileRoute } from "@tanstack/react-router";
 import {
   BrandMark,
   ChapterCopy,
+  ChapterPanel,
   ChapterRail,
   DepthHud,
   FinalCta,
+  StatusTicker,
   TopRightAuth,
 } from "@/components/landing/StoryOverlay";
 import { useLenis } from "@/hooks/useLenis";
