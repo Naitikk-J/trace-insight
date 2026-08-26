@@ -10,7 +10,8 @@ import { ApiError } from "../utils/ApiError";
 import { logger } from "../utils/logger";
 import { assertCaseAccess, asObjectId, caseScopeFilter } from "./access.service";
 import { Case } from "../models/Case.model";
-import { detectSignals, rankPaths, runTrace } from "./intelligence.service";
+import { detectSignals, rankPaths, runTrace, type TraceRequest } from "./intelligence.service";
+import { getChainProvider, syntheticProvider, traceWithProvider } from "./blockchain";
 
 export interface StartTraceInput {
   caseId: string;
@@ -90,28 +91,67 @@ export async function startInvestigation(user: AuthenticatedUser, input: StartTr
   return investigation;
 }
 
-/** Run the intelligence pipeline and persist the resulting graph. */
+/**
+ * Run the intelligence pipeline and persist the resulting graph.
+ *
+ * The chain-data provider is resolved per chain: GraphSense when it is
+ * configured and indexes that chain, the deterministic synthetic ledger
+ * otherwise. A live-provider failure degrades to the synthetic trace rather
+ * than failing the investigation, and the record states which source was used
+ * so nothing is presented as live data when it is not.
+ */
 export async function executeTrace(investigationId: string, seedValueUsd?: number): Promise<void> {
   try {
     const investigation = await Investigation.findById(investigationId);
     if (!investigation) return;
 
+    const provider = getChainProvider(investigation.chain);
+
     investigation.status = "tracing";
     investigation.progress = 25;
+    investigation.dataSource = provider.id;
+    investigation.progressNote = `Expanding hops via ${provider.label}`;
     await investigation.save();
 
-    const result = runTrace({
+    const request: TraceRequest = {
       rootAddress: investigation.rootAddress,
       chain: investigation.chain,
       maxHops: investigation.maxHops,
       minValueUsd: investigation.minValueUsd,
       direction: investigation.direction,
       ...(seedValueUsd !== undefined ? { seedValueUsd } : {}),
-    });
+    };
+
+    let result: Awaited<ReturnType<typeof traceWithProvider>> | ReturnType<typeof runTrace> & {
+      source: "graphsense" | "synthetic";
+    };
+
+    if (provider.id === "graphsense") {
+      try {
+        result = await traceWithProvider(provider, request);
+      } catch (error) {
+        logger.warn("live provider trace failed — falling back to synthetic", {
+          investigationId,
+          reason: error instanceof Error ? error.message : String(error),
+        });
+        result = { ...runTrace(request), source: syntheticProvider.id };
+      }
+    } else {
+      result = { ...runTrace(request), source: syntheticProvider.id };
+    }
+
+    investigation.status = "analysing";
+    investigation.progress = 70;
+    await investigation.save();
 
     investigation.graph = { nodes: result.nodes, edges: result.edges };
     investigation.metrics = result.metrics;
     investigation.riskScore = result.riskScore;
+    investigation.dataSource = result.source;
+    investigation.progressNote =
+      result.source === "graphsense"
+        ? "Graph sourced from GraphSense ledger index"
+        : "Graph sourced from the deterministic synthetic ledger";
     investigation.status = "complete";
     investigation.progress = 100;
     investigation.completedAt = new Date();
@@ -135,7 +175,13 @@ export async function analyseInvestigation(id: string, user: AuthenticatedUser) 
   const edges = investigation.graph.edges.map((e) => ({ ...e, timestamp: new Date(e.timestamp) }));
 
   if (nodes.length === 0) {
-    return { paths: [], signals: [], riskScore: investigation.riskScore, metrics: investigation.metrics };
+    return {
+      paths: [],
+      signals: [],
+      riskScore: investigation.riskScore,
+      metrics: investigation.metrics,
+      dataSource: investigation.dataSource,
+    };
   }
 
   return {
@@ -143,6 +189,7 @@ export async function analyseInvestigation(id: string, user: AuthenticatedUser) 
     signals: detectSignals(nodes, edges),
     riskScore: investigation.riskScore,
     metrics: investigation.metrics,
+    dataSource: investigation.dataSource,
   };
 }
 
