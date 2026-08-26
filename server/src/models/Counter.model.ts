@@ -19,8 +19,7 @@ const counterSchema = new Schema<CounterDoc>(
   { versionKey: false },
 );
 
-export const Counter: Model<CounterDoc> =
-  (model as never) && model<CounterDoc>("Counter", counterSchema);
+export const Counter: Model<CounterDoc> = model<CounterDoc>("Counter", counterSchema);
 
 /** Reserve the next id for a prefix, e.g. `nextSequentialId("CASE")`. */
 export async function nextSequentialId(prefix: string): Promise<string> {
