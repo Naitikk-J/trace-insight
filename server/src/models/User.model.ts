@@ -1,5 +1,5 @@
 import bcrypt from "bcryptjs";
-import { Schema, model, type Document, type Model } from "mongoose";
+import { Schema, Types, model, type Document, type Model } from "mongoose";
 import type { AppRole } from "../types/express";
 
 export interface UserDoc extends Document {
