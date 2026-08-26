@@ -51,7 +51,7 @@ export function ContextScene() {
           if (mat && "opacity" in mat) {
             mat.transparent = true;
             (mat as THREE.MeshBasicMaterial).opacity =
-              alive * (0.06 + 0.05 * Math.sin(t * 0.5 + i));
+              alive * (0.028 + 0.02 * Math.sin(t * 0.5 + i));
           }
         });
       });
@@ -76,12 +76,12 @@ export function ContextScene() {
         {LAYERS.map((l, i) => (
           <group key={l.label} position={[0, 0, l.z]}>
             <mesh>
-              <planeGeometry args={[120, 68, 22, 12]} />
+              <planeGeometry args={[86, 48, 8, 5]} />
               <meshBasicMaterial
                 color={l.color}
                 wireframe
                 transparent
-                opacity={0.08}
+                opacity={0.05}
                 depthWrite={false}
                 side={THREE.DoubleSide}
               />

@@ -31,7 +31,8 @@ export function EvidenceScene() {
   useFrame((state) => {
     const p = story.progress;
     const t = state.clock.elapsedTime;
-    const alive = ramp(p, 0.9, 0.94);
+    // Clears out before the convergence so nothing overlaps the final mark.
+    const alive = ramp(p, 0.9, 0.94) * (1 - ramp(p, 0.945, 0.962));
     const g = group.current;
     if (!g) return;
     g.visible = alive > 0.02;
@@ -52,7 +53,7 @@ export function EvidenceScene() {
           | undefined;
         if (mat && mat.opacity !== undefined) {
           mat.transparent = true;
-          mat.opacity = settle * (mat.wireframe ? 0.3 : 0.1);
+          mat.opacity = settle * alive * (mat.wireframe ? 0.3 : 0.1);
         }
       });
     });
@@ -93,7 +94,7 @@ export function EvidenceScene() {
           size={0.62}
           color={PAL.light}
           near={26}
-          far={64}
+          far={54}
           plane={false}
         />
       ))}

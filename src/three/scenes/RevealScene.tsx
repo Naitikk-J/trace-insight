@@ -36,11 +36,12 @@ export function RevealScene({ lite }: { lite: boolean }) {
       from[i3 + 1] = (rand() - 0.5) * 140;
       from[i3 + 2] = Z + 90 - rand() * 60;
       // Target: concentric hexagonal ledger rings.
-      const ring = i % 5;
-      const r = 5 + ring * 3.6;
-      const a = (i / count) * Math.PI * 18;
+      const ring = i % 8;
+      const r = 4 + ring * 2.6;
+      // Even angular spread per ring, lightly snapped to a hexagonal lattice.
+      const a = (Math.floor(i / 8) / Math.ceil(count / 8)) * Math.PI * 2;
       const hex = Math.round(a / (Math.PI / 3)) * (Math.PI / 3);
-      const angle = hex * 0.8 + a * 0.2;
+      const angle = hex * 0.35 + a * 0.65;
       to[i3] = Math.cos(angle) * r;
       to[i3 + 1] = Math.sin(angle) * r * 0.94;
       to[i3 + 2] = Z + (rand() - 0.5) * 2.5;
@@ -66,7 +67,7 @@ export function RevealScene({ lite }: { lite: boolean }) {
   useFrame((state, delta) => {
     const p = story.progress;
     const t = state.clock.elapsedTime;
-    const converge = ramp(p, 0.945, 0.995);
+    const converge = ramp(p, 0.94, 0.985);
     const alive = ramp(p, 0.925, 0.96);
 
     const pos = geom.attributes["position"]!.array as Float32Array;
