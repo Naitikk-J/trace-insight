@@ -40,10 +40,11 @@ export function ChapterCopy({ chapter }: { chapter: Chapter }) {
   return (
     <div
       className={cn(
-        "pointer-events-none fixed inset-x-5 bottom-24 top-24 z-20 flex max-w-[calc(100vw-2.5rem)] flex-col justify-center gap-3 md:inset-y-[20vh] md:w-[min(36vw,34rem)] md:max-w-none md:gap-5",
+        "pointer-events-none fixed inset-x-6 bottom-[19vh] top-[14vh] z-20 flex max-w-[calc(100vw-3rem)] flex-col justify-center gap-3.5 md:inset-x-auto md:inset-y-[20vh] md:w-[min(36vw,34rem)] md:max-w-none md:gap-5",
         ALIGN[o.align],
       )}
     >
+
       <span
         className={cn(
           "font-mono text-[10px] tracking-[0.42em] text-primary/70 transition-all duration-700",
