@@ -47,6 +47,9 @@ export interface InvestigationDoc extends Document {
   minValueUsd: number;
   status: TraceStatus;
   progress: number;
+  /** Which chain-data provider produced the stored graph. */
+  dataSource: "graphsense" | "synthetic";
+  progressNote?: string;
   riskScore: number;
   graph: { nodes: GraphNode[]; edges: GraphEdge[] };
   metrics: {
@@ -104,6 +107,8 @@ const investigationSchema = new Schema<InvestigationDoc>(
     minValueUsd: { type: Number, default: 0, min: 0 },
     status: { type: String, enum: TRACE_STATUSES, default: "queued", index: true },
     progress: { type: Number, default: 0, min: 0, max: 100 },
+    dataSource: { type: String, enum: ["graphsense", "synthetic"], default: "synthetic" },
+    progressNote: { type: String, maxlength: 200 },
     riskScore: { type: Number, default: 0, min: 0, max: 100 },
     graph: {
       nodes: { type: [nodeSchema], default: [] },

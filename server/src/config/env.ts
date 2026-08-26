@@ -19,6 +19,14 @@ const envSchema = z
     JWT_SECRET: z.string().min(24, "JWT_SECRET must be at least 24 characters long"),
     JWT_EXPIRES_IN: z.string().min(1).default("7d"),
     CLIENT_URL: z.string().min(1).default("http://localhost:5173"),
+
+    // GraphSense (chain data). Absent URL = deterministic synthetic provider.
+    GRAPHSENSE_API_URL: z
+      .string()
+      .url("GRAPHSENSE_API_URL must be an absolute http(s) URL")
+      .optional(),
+    GRAPHSENSE_API_KEY: z.string().min(1).optional(),
+    GRAPHSENSE_TIMEOUT_MS: z.coerce.number().int().min(1000).max(60_000).default(12_000),
   })
   .superRefine((value, ctx) => {
     if (value.NODE_ENV !== "production") return;
@@ -37,6 +45,20 @@ const envSchema = z
         code: z.ZodIssueCode.custom,
         path: ["CLIENT_URL"],
         message: "Production CLIENT_URL must not point at localhost",
+      });
+    }
+    if (value.GRAPHSENSE_API_URL && !value.GRAPHSENSE_API_URL.startsWith("https://")) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["GRAPHSENSE_API_URL"],
+        message: "Production chain-data calls must use https",
+      });
+    }
+    if (value.GRAPHSENSE_API_URL && !value.GRAPHSENSE_API_KEY) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["GRAPHSENSE_API_KEY"],
+        message: "GRAPHSENSE_API_KEY is required when GRAPHSENSE_API_URL is set",
       });
     }
     if (/^(dev|test|change|secret|password)/i.test(value.JWT_SECRET)) {
@@ -68,6 +90,8 @@ export const env = {
   ...raw,
   isProduction: raw.NODE_ENV === "production",
   isDevelopment: raw.NODE_ENV === "development",
+  /** True when a live chain-data provider is configured. */
+  hasGraphSense: Boolean(raw.GRAPHSENSE_API_URL),
   /** Every origin permitted by CORS. */
   allowedOrigins: raw.CLIENT_URL.split(",")
     .map((origin) => origin.trim())
