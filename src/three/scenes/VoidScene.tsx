@@ -3,7 +3,7 @@
  *
  * Not a black screen: an enormous, quiet space. Extremely faint points at
  * extreme distance, occasional transaction pulses, and barely-visible geometric
- * topology so the very first frame already reads as depth rather than背景.
+ * topology so the very first frame already reads as depth rather than a backdrop.
  */
 import { useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
