@@ -14,6 +14,7 @@ import {
   ChapterRail,
   DepthHud,
   FinalCta,
+  TopRightAuth,
 } from "@/components/landing/StoryOverlay";
 import { useStoryProgress } from "@/hooks/useStoryProgress";
 
