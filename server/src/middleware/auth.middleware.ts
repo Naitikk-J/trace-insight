@@ -37,14 +37,29 @@ export const requireAuth: RequestHandler = asyncHandler(async (req, _res, next) 
   next();
 });
 
-/** Attach the user when a token is present, but never reject the request. */
-export const optionalAuth: RequestHandler = (req, res, next) => {
-  if (!bearerToken(req)) {
+/** Attach the user when a valid token is present, but never reject. */
+export const optionalAuth: RequestHandler = asyncHandler(async (req, _res, next) => {
+  const token = bearerToken(req);
+  if (!token) {
     next();
     return;
   }
-  requireAuth(req, res, (error?: unknown) => next(error instanceof Error ? undefined : undefined));
-};
+  try {
+    const claims = verifyAccessToken(token);
+    const user = await User.findById(claims.sub).select("email name role isActive").lean();
+    if (user?.isActive) {
+      req.user = {
+        id: String(user._id),
+        email: user.email,
+        name: user.name,
+        role: user.role,
+      };
+    }
+  } catch {
+    // An invalid token on an optional route is treated as anonymous.
+  }
+  next();
+});
 
 export function requireRole(...roles: AppRole[]): RequestHandler {
   return (req: Request, _res: Response, next: NextFunction) => {
