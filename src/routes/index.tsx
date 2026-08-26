@@ -82,6 +82,7 @@ function Landing() {
       />
 
       <BrandMark />
+      <TopRightAuth />
       <ChapterCopy chapter={chapter} />
       <ChapterRail chapter={chapter} onJump={jump} />
       <DepthHud progress={progress} />
