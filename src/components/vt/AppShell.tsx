@@ -32,6 +32,9 @@ import { useAuth } from "@/hooks/useAuth";
 
 const NAV = [
   { to: "/dashboard", label: "Dashboard", icon: Gauge },
+  { to: "/complaints", label: "Complaints", icon: Inbox },
+  { to: "/alerts", label: "Alerts", icon: Siren },
+  { to: "/attribution", label: "Attribution", icon: Building2 },
   { to: "/cases", label: "Cases", icon: FolderOpen },
   { to: "/investigations", label: "Investigations", icon: Radar },
   { to: "/findings", label: "Findings", icon: ShieldAlert },
@@ -39,6 +42,7 @@ const NAV = [
   { to: "/reports", label: "Reports", icon: FileText },
   { to: "/settings", label: "Settings", icon: Settings },
 ] as const;
+
 
 const NOTIFICATIONS = [
   {
