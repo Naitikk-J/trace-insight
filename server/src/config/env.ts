@@ -26,6 +26,14 @@ const envSchema = z
     GRAPHSENSE_API_KEY: z
       .preprocess((v) => (v === "" ? undefined : v), z.string().min(1).optional()),
     GRAPHSENSE_TIMEOUT_MS: z.coerce.number().int().min(1000).max(60_000).default(12_000),
+
+    // Shared API key(s) for NCRP / SAHYOG / LEA complaint intake. Comma
+    // separated so each integrator can be rotated independently.
+    INTAKE_API_KEYS: z.preprocess(
+      (v) => (v === "" ? undefined : v),
+      z.string().min(16, "INTAKE_API_KEYS entries must be long random values").optional(),
+    ),
+
   })
   .superRefine((value, ctx) => {
     if (value.NODE_ENV !== "production") return;
