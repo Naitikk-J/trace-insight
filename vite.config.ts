@@ -5,8 +5,6 @@ import tailwindcss from "@tailwindcss/vite";
 import tsConfigPaths from "vite-tsconfig-paths";
 import { nitro } from "nitro/vite";
 
-const isVercel = !!process.env["VERCEL"];
-
 export default defineConfig(({ command }) => ({
   plugins: [
     tailwindcss(),
@@ -23,15 +21,10 @@ export default defineConfig(({ command }) => ({
     }),
     viteReact(),
     command === "build"
-      ? nitro(
-          isVercel
-            ? { defaultPreset: "vercel", noExternals: true }
-            : {
-                defaultPreset: "cloudflare_module",
-                noExternals: true,
-                output: { dir: "dist" },
-              },
-        )
+      ? nitro({
+          defaultPreset: "vercel",
+          noExternals: true,
+        })
       : null,
   ],
 }));
