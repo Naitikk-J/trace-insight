@@ -5,6 +5,8 @@ import tailwindcss from "@tailwindcss/vite";
 import tsConfigPaths from "vite-tsconfig-paths";
 import { nitro } from "nitro/vite";
 
+const isVercel = !!process.env["VERCEL"];
+
 export default defineConfig(({ command }) => ({
   plugins: [
     tailwindcss(),
