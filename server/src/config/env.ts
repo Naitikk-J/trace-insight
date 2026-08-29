@@ -99,6 +99,11 @@ export const env = {
   isDevelopment: raw.NODE_ENV === "development",
   /** True when a live chain-data provider is configured. */
   hasGraphSense: Boolean(raw.GRAPHSENSE_API_URL),
+  /** Configured intake API keys; empty disables the machine intake surface. */
+  intakeApiKeys: (raw.INTAKE_API_KEYS ?? "")
+    .split(",")
+    .map((key) => key.trim())
+    .filter(Boolean),
   /** Every origin permitted by CORS. */
   allowedOrigins: raw.CLIENT_URL.split(",")
     .map((origin) => origin.trim())
