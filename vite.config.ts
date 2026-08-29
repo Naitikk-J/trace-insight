@@ -24,6 +24,7 @@ export default defineConfig(({ command }) => ({
       ? nitro({
           defaultPreset: "cloudflare_module",
           noExternals: true,
+          output: { dir: "dist" },
         })
       : null,
   ],
