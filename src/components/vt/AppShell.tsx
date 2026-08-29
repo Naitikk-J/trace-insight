@@ -3,10 +3,14 @@ import { AnimatePresence, motion } from "motion/react";
 import {
   Bell,
   Boxes,
+  Building2,
   ChevronsLeft,
   FileText,
   FolderOpen,
   Gauge,
+  Inbox,
+  Siren,
+
   LogOut,
   PanelLeft,
   Radar,
