@@ -19,6 +19,8 @@ import { Route as AuthenticatedReportsRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated.settings'
 import { Route as AuthenticatedCasesIndexRouteImport } from './routes/_authenticated.cases.index'
 import { Route as AuthenticatedCasesCaseIdRouteImport } from './routes/_authenticated.cases.$caseId'
+import { Route as AuthenticatedComplaintsIndexRouteImport } from './routes/_authenticated.complaints.index'
+import { Route as AuthenticatedComplaintsComplaintIdRouteImport } from './routes/_authenticated.complaints.$complaintId'
 import { Route as AuthenticatedInvestigationsIndexRouteImport } from './routes/_authenticated.investigations.index'
 import { Route as AuthenticatedInvestigationsInvestigationIdRouteImport } from './routes/_authenticated.investigations.$investigationId'
 
@@ -72,6 +74,18 @@ const AuthenticatedCasesCaseIdRoute =
     path: '/cases/$caseId',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedComplaintsIndexRoute =
+  AuthenticatedComplaintsIndexRouteImport.update({
+    id: '/complaints/',
+    path: '/complaints/',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedComplaintsComplaintIdRoute =
+  AuthenticatedComplaintsComplaintIdRouteImport.update({
+    id: '/complaints/$complaintId',
+    path: '/complaints/$complaintId',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedInvestigationsIndexRoute =
   AuthenticatedInvestigationsIndexRouteImport.update({
     id: '/investigations/',
@@ -94,8 +108,10 @@ export interface FileRoutesByFullPath {
   '/reports': typeof AuthenticatedReportsRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/cases/$caseId': typeof AuthenticatedCasesCaseIdRoute
+  '/complaints/$complaintId': typeof AuthenticatedComplaintsComplaintIdRoute
   '/investigations/$investigationId': typeof AuthenticatedInvestigationsInvestigationIdRoute
   '/cases/': typeof AuthenticatedCasesIndexRoute
+  '/complaints/': typeof AuthenticatedComplaintsIndexRoute
   '/investigations/': typeof AuthenticatedInvestigationsIndexRoute
 }
 export interface FileRoutesByTo {
@@ -107,8 +123,10 @@ export interface FileRoutesByTo {
   '/reports': typeof AuthenticatedReportsRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/cases/$caseId': typeof AuthenticatedCasesCaseIdRoute
+  '/complaints/$complaintId': typeof AuthenticatedComplaintsComplaintIdRoute
   '/investigations/$investigationId': typeof AuthenticatedInvestigationsInvestigationIdRoute
   '/cases': typeof AuthenticatedCasesIndexRoute
+  '/complaints': typeof AuthenticatedComplaintsIndexRoute
   '/investigations': typeof AuthenticatedInvestigationsIndexRoute
 }
 export interface FileRoutesById {
@@ -122,8 +140,10 @@ export interface FileRoutesById {
   '/_authenticated/reports': typeof AuthenticatedReportsRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/cases/$caseId': typeof AuthenticatedCasesCaseIdRoute
+  '/_authenticated/complaints/$complaintId': typeof AuthenticatedComplaintsComplaintIdRoute
   '/_authenticated/investigations/$investigationId': typeof AuthenticatedInvestigationsInvestigationIdRoute
   '/_authenticated/cases/': typeof AuthenticatedCasesIndexRoute
+  '/_authenticated/complaints/': typeof AuthenticatedComplaintsIndexRoute
   '/_authenticated/investigations/': typeof AuthenticatedInvestigationsIndexRoute
 }
 export interface FileRouteTypes {
@@ -137,8 +157,10 @@ export interface FileRouteTypes {
     | '/reports'
     | '/settings'
     | '/cases/$caseId'
+    | '/complaints/$complaintId'
     | '/investigations/$investigationId'
     | '/cases/'
+    | '/complaints/'
     | '/investigations/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -150,8 +172,10 @@ export interface FileRouteTypes {
     | '/reports'
     | '/settings'
     | '/cases/$caseId'
+    | '/complaints/$complaintId'
     | '/investigations/$investigationId'
     | '/cases'
+    | '/complaints'
     | '/investigations'
   id:
     | '__root__'
@@ -164,8 +188,10 @@ export interface FileRouteTypes {
     | '/_authenticated/reports'
     | '/_authenticated/settings'
     | '/_authenticated/cases/$caseId'
+    | '/_authenticated/complaints/$complaintId'
     | '/_authenticated/investigations/$investigationId'
     | '/_authenticated/cases/'
+    | '/_authenticated/complaints/'
     | '/_authenticated/investigations/'
   fileRoutesById: FileRoutesById
 }
@@ -247,6 +273,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCasesCaseIdRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/complaints/': {
+      id: '/_authenticated/complaints/'
+      path: '/complaints'
+      fullPath: '/complaints/'
+      preLoaderRoute: typeof AuthenticatedComplaintsIndexRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/complaints/$complaintId': {
+      id: '/_authenticated/complaints/$complaintId'
+      path: '/complaints/$complaintId'
+      fullPath: '/complaints/$complaintId'
+      preLoaderRoute: typeof AuthenticatedComplaintsComplaintIdRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/investigations/': {
       id: '/_authenticated/investigations/'
       path: '/investigations'
@@ -271,8 +311,10 @@ interface AuthenticatedRouteChildren {
   AuthenticatedReportsRoute: typeof AuthenticatedReportsRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedCasesCaseIdRoute: typeof AuthenticatedCasesCaseIdRoute
+  AuthenticatedComplaintsComplaintIdRoute: typeof AuthenticatedComplaintsComplaintIdRoute
   AuthenticatedInvestigationsInvestigationIdRoute: typeof AuthenticatedInvestigationsInvestigationIdRoute
   AuthenticatedCasesIndexRoute: typeof AuthenticatedCasesIndexRoute
+  AuthenticatedComplaintsIndexRoute: typeof AuthenticatedComplaintsIndexRoute
   AuthenticatedInvestigationsIndexRoute: typeof AuthenticatedInvestigationsIndexRoute
 }
 
@@ -283,9 +325,12 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedReportsRoute: AuthenticatedReportsRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedCasesCaseIdRoute: AuthenticatedCasesCaseIdRoute,
+  AuthenticatedComplaintsComplaintIdRoute:
+    AuthenticatedComplaintsComplaintIdRoute,
   AuthenticatedInvestigationsInvestigationIdRoute:
     AuthenticatedInvestigationsInvestigationIdRoute,
   AuthenticatedCasesIndexRoute: AuthenticatedCasesIndexRoute,
+  AuthenticatedComplaintsIndexRoute: AuthenticatedComplaintsIndexRoute,
   AuthenticatedInvestigationsIndexRoute: AuthenticatedInvestigationsIndexRoute,
 }
 
