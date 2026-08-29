@@ -63,6 +63,7 @@ cp .env.example .env # then fill in the values
 | `GRAPHSENSE_API_URL` | no | — | GraphSense REST base URL; empty = synthetic provider |
 | `GRAPHSENSE_API_KEY` | conditional | — | required whenever the URL is set |
 | `GRAPHSENSE_TIMEOUT_MS` | no | `12000` | per-request timeout for chain lookups |
+| `INTAKE_API_KEYS` | no | — | comma-separated API keys for NCRP/SAHYOG complaint intake |
 
 Missing or invalid values abort startup with an explicit list of problems. Secrets are never hardcoded and `.env` is git-ignored.
 
@@ -201,6 +202,48 @@ A live-provider failure mid-trace degrades to the synthetic trace rather than
 failing the investigation, and every investigation records `dataSource`
 (`graphsense` | `synthetic`) so nothing is presented as live data when it is
 not.
+
+## Complaint intake, attribution and alerting
+
+Victim-reported wallet addresses arrive from a cybercrime portal and are turned
+into actionable attribution automatically.
+
+| Method | Route | Auth | Purpose |
+| --- | --- | --- | --- |
+| POST | `/api/intake/complaints` | `x-api-key` | NCRP / SAHYOG / LEA machine intake (idempotent on `externalRef`) |
+| GET | `/api/complaints` | session | Triage list, filterable by status, source, risk category |
+| GET | `/api/complaints/queue` | session | Queue rollups: totals, attribution rate, highest-risk complaints |
+| POST | `/api/complaints` | session | Investigator-filed complaint |
+| POST | `/api/complaints/attribute` | session | Ad-hoc real-time attribution of one address |
+| GET | `/api/complaints/:id` | session | Complaint with per-address attribution |
+| GET | `/api/complaints/:id/report` | session | Standardised LEA attribution report |
+| POST | `/api/complaints/:id/retriage` | session | Re-run attribution (e.g. wider hop bound) |
+| POST | `/api/complaints/:id/escalate` | session | Promote the complaint into a case |
+| GET | `/api/alerts` | session | Automated alert queue |
+| PATCH | `/api/alerts/:id/status` | session | Acknowledge / action / dismiss an alert |
+
+**Pipeline.** Intake acknowledges immediately and triages asynchronously, so an
+upstream portal is never blocked on chain lookups. For each suspect address the
+attribution service runs the bounded trace against the live provider (falling
+back to the deterministic ledger, and saying so), then:
+
+1. finds every regulated touchpoint and ranks them nearest-first, with a
+   confidence that combines proximity, attribution strength and value continuity;
+2. classifies intermediary wallets by role (splitter, consolidator, pass-through,
+   layering);
+3. flags cross-chain bridge hops and mixer/privacy-service exposure;
+4. extracts a normalised feature vector, classifies the fraud typology, and
+   scores risk 0–100 with the driving reasons listed;
+5. raises deduplicated alerts, each with concrete recommended actions.
+
+Complaint-level risk is the worst of its addresses, and the primary VASP is the
+closest highest-confidence touchpoint across all of them — that is who receives
+the freeze request.
+
+**Typology model.** `typology.service.ts` uses one explicit linear (logistic)
+model per fraud class over structural graph features. Weights are constants, so
+every prediction is fully explainable — a requirement for evidence that may be
+presented in court. Training new weights is a data change, not a code change.
 
 ## Intelligence engine
 
