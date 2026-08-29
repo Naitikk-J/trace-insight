@@ -23,11 +23,15 @@ export default defineConfig(({ command }) => ({
     }),
     viteReact(),
     command === "build"
-      ? nitro({
-          defaultPreset: "cloudflare_module",
-          noExternals: true,
-          output: { dir: "dist" },
-        })
+      ? nitro(
+          isVercel
+            ? { defaultPreset: "vercel", noExternals: true }
+            : {
+                defaultPreset: "cloudflare_module",
+                noExternals: true,
+                output: { dir: "dist" },
+              },
+        )
       : null,
   ],
 }));
