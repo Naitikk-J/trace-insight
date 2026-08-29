@@ -1,18 +1,24 @@
 import { useMemo, useState } from "react";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { motion } from "motion/react";
+import { motion, AnimatePresence } from "motion/react";
 import {
   ArrowLeft,
   Clock,
   Copy,
+  FileText,
   Fingerprint,
   Layers,
   Pin,
   Route as RouteIcon,
   ShieldAlert,
+  ShieldCheck,
   Sparkles,
+  Zap,
+  CheckCircle2,
+  AlertTriangle,
+  Compass,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -26,6 +32,7 @@ import {
   SeverityBadge,
 } from "@/components/vt/badges";
 import { GraphCanvas, NODE_KIND_LABEL } from "@/components/vt/GraphCanvas";
+import { ReportBuilderDialog } from "@/components/vt/ReportBuilderDialog";
 import {
   EmptyState,
   ErrorState,
@@ -36,11 +43,12 @@ import {
   createEvidence,
   createFinding,
   investigationQuery,
+  casesQuery,
 } from "@/lib/api/queries";
 import { chainLabel, truncateAddress } from "@/lib/domain";
 import { intelligence } from "@/services/intelligence";
-import type { GraphEdge, GraphNode } from "@/services/intelligence";
-import { useWorkspaceStore } from "@/stores/ui";
+import type { GraphEdge, GraphNode, TracePath } from "@/services/intelligence";
+import { useUIStore, useWorkspaceStore } from "@/stores/ui";
 
 export const Route = createFileRoute(
   "/_authenticated/investigations/$investigationId",
@@ -71,15 +79,20 @@ function copy(value: string) {
 
 function WorkspacePage() {
   const { investigationId } = Route.useParams();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const selection = useWorkspaceStore((s) => s.selection);
   const select = useWorkspaceStore((s) => s.select);
   const focusedPath = useWorkspaceStore((s) => s.focusedPath);
   const setFocusedPath = useWorkspaceStore((s) => s.setFocusedPath);
+  const openInvestigationModal = useUIStore((s) => s.openInvestigationModal);
 
   const [selectedEdge, setSelectedEdge] = useState<GraphEdge | null>(null);
+  const [reportDialogOpen, setReportDialogOpen] = useState(false);
+  const [activeTimelineFilter, setActiveTimelineFilter] = useState<string | null>(null);
 
   const investigation = useQuery(investigationQuery(investigationId));
+  const cases = useQuery(casesQuery());
 
   const analysis = useMemo(() => {
     if (!investigation.data) return null;
@@ -92,6 +105,11 @@ function WorkspacePage() {
       timeline: intelligence.timeline(graph),
     };
   }, [investigation.data]);
+
+  const caseObj = useMemo(() => {
+    if (!investigation.data || !cases.data) return null;
+    return cases.data.find((c) => c.id === investigation.data?.case_id) ?? null;
+  }, [investigation.data, cases.data]);
 
   const pinEvidence = useMutation({
     mutationFn: (input: { title: string; description: string; type: string }) =>
@@ -147,38 +165,74 @@ function WorkspacePage() {
       : null;
   const primaryPath = paths[0];
 
+  const handleTraceFromNode = (address: string) => {
+    openInvestigationModal(record.case_id);
+    toast.info(`Opening new trace starting from ${truncateAddress(address, 6, 4)}`);
+  };
+
+  const handleTimelineClick = (eventId: string, nodeId?: string, pathId?: string) => {
+    setActiveTimelineFilter((prev) => (prev === eventId ? null : eventId));
+    if (nodeId) {
+      const targetNode = graph.nodes.find((n) => n.id === nodeId);
+      if (targetNode) {
+        setSelectedEdge(null);
+        select("wallet", targetNode.id);
+      }
+    }
+    if (pathId) {
+      setFocusedPath(pathId);
+    }
+  };
+
   return (
     <div className="space-y-5">
-      <Link
-        to="/cases/$caseId"
-        params={{ caseId: record.case_id }}
-        className="inline-flex items-center gap-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground"
-      >
-        <ArrowLeft className="size-3.5" />
-        Back to case file
-      </Link>
+      <div className="flex items-center justify-between">
+        <Link
+          to="/cases/$caseId"
+          params={{ caseId: record.case_id }}
+          className="inline-flex items-center gap-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground"
+        >
+          <ArrowLeft className="size-3.5" />
+          Back to case file ({caseObj?.case_ref || "Case"})
+        </Link>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setReportDialogOpen(true)}
+            className="text-xs gap-1.5 border-border hover:border-primary/50"
+          >
+            <FileText className="size-3.5 text-primary" />
+            Generate Dossier Report
+          </Button>
+        </div>
+      </div>
 
       {/* Workspace header */}
-      <header className="panel px-4 py-4">
+      <header className="panel px-5 py-4.5 bg-surface/40">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <Mono className="text-muted-foreground">
+              <Mono className="text-muted-foreground font-semibold">
                 {record.investigation_ref}
               </Mono>
               <InvestigationStatusBadge status={record.status} />
-              <Chip>{chainLabel(record.blockchain)}</Chip>
-              <Chip tone="intel">{record.trace_depth}-hop bound</Chip>
+              <Chip tone="neutral">{chainLabel(record.blockchain)}</Chip>
+              <Chip tone="intel">{record.trace_depth}-hop bounded graph</Chip>
             </div>
-            <h1 className="mt-2 text-xl font-semibold tracking-tight">
+            <h1 className="mt-2 text-xl font-bold tracking-tight text-foreground">
               {record.name}
             </h1>
             <button
               onClick={() => copy(record.target_address)}
-              className="mono mt-1.5 inline-flex items-center gap-1.5 text-[12px] text-muted-foreground transition-colors hover:text-foreground"
+              className="mono mt-1.5 inline-flex items-center gap-1.5 text-[12px] text-muted-foreground transition-colors hover:text-foreground group"
+              title="Click to copy target address"
             >
-              {record.target_address}
-              <Copy className="size-3" />
+              <span>Subject Root:</span>
+              <span className="text-foreground group-hover:underline font-medium">
+                {record.target_address}
+              </span>
+              <Copy className="size-3 text-muted-foreground group-hover:text-foreground" />
             </button>
           </div>
 
@@ -195,8 +249,8 @@ function WorkspacePage() {
                 })
               }
             >
-              <Pin className="size-4" />
-              Pin graph snapshot
+              <Pin className="size-3.5" />
+              Pin Snapshot
             </Button>
             <Button
               size="sm"
@@ -212,50 +266,52 @@ function WorkspacePage() {
                 })
               }
             >
-              <Sparkles className="size-4" />
-              Record primary finding
+              <Sparkles className="size-3.5" />
+              Record Finding
             </Button>
           </div>
         </div>
 
         {record.status === "processing" ? (
-          <div className="mt-4">
+          <div className="mt-4 pt-3 border-t border-border/50">
             <div className="mb-1.5 flex justify-between text-[10px] text-muted-foreground">
-              <span>Ingesting and bounding the graph</span>
-              <span className="mono">hop 2 / {record.trace_depth}</span>
+              <span>Automated pipeline: Ingesting on-chain transfers and normalizing graph</span>
+              <span className="mono">Hop 2 / {record.trace_depth}</span>
             </div>
-            <Progress value={52} className="h-1" />
+            <Progress value={62} className="h-1.5" />
           </div>
         ) : null}
       </header>
 
+      {/* KPI Tiles */}
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <StatTile
-          label="Addresses in scope"
+          label="Addresses in Scope"
           value={graph.nodes.length}
           hint={`bounded at ${graph.bounds.hops} hops`}
         />
         <StatTile
-          label="Traced transfers"
+          label="Traced Transfers"
           value={graph.edges.length}
-          hint="value-carrying edges"
+          hint="verified on-chain records"
         />
         <StatTile
-          label="Relevant paths"
+          label="Value Paths"
           value={paths.length}
-          hint="ranked by value continuity"
+          hint="ranked by continuity score"
           tone="intel"
         />
         <StatTile
-          label="Attribution candidates"
+          label="Attributed VASP Candidates"
           value={entities.length}
-          hint="entity / VASP inference"
+          hint="actionable endpoints"
           tone="positive"
         />
       </div>
 
-      <div className="grid gap-4 xl:grid-cols-[1.6fr_1fr]">
-        {/* Canvas + analysis */}
+      {/* Main Workspace Layout (Blueprint Pages 100-105: 2-Column Desktop Grid) */}
+      <div className="grid gap-5 xl:grid-cols-[1.65fr_1fr]">
+        {/* Left Column: Canvas + Tabs */}
         <div className="space-y-4">
           <GraphCanvas
             graph={graph}
@@ -270,64 +326,92 @@ function WorkspacePage() {
               select("transaction", edge.id);
               setSelectedEdge(edge);
             }}
+            onToggleFocus={() => setFocusedPath(null)}
           />
 
           <Tabs defaultValue="paths">
-            <TabsList>
-              <TabsTrigger value="paths">Paths</TabsTrigger>
-              <TabsTrigger value="entities">Entities</TabsTrigger>
-              <TabsTrigger value="signals">Signals</TabsTrigger>
-              <TabsTrigger value="timeline">Timeline</TabsTrigger>
+            <TabsList className="bg-surface border border-border">
+              <TabsTrigger value="paths" className="gap-1.5">
+                <RouteIcon className="size-3.5" />
+                Value Paths ({paths.length})
+              </TabsTrigger>
+              <TabsTrigger value="entities" className="gap-1.5">
+                <Fingerprint className="size-3.5" />
+                Entity Intelligence ({entities.length})
+              </TabsTrigger>
+              <TabsTrigger value="signals" className="gap-1.5">
+                <ShieldAlert className="size-3.5" />
+                Structural Signals ({signals.length})
+              </TabsTrigger>
+              <TabsTrigger value="timeline" className="gap-1.5">
+                <Clock className="size-3.5" />
+                Chronology ({timeline.length})
+              </TabsTrigger>
             </TabsList>
 
+            {/* Tab 1: Prioritized Value Paths */}
             <TabsContent value="paths" className="mt-3 space-y-2.5">
-              {paths.map((p) => {
+              {paths.map((p, idx) => {
                 const active = focusedPath === p.id;
                 return (
-                  <button
+                  <div
                     key={p.id}
-                    onClick={() => setFocusedPath(active ? null : p.id)}
-                    className={`panel w-full px-4 py-3.5 text-left transition-colors ${
-                      active ? "border-primary/60" : "hover:border-border-strong"
+                    className={`panel p-4 transition-all duration-200 ${
+                      active
+                        ? "border-primary shadow-[0_0_20px_-8px_var(--primary-glow)] bg-primary/5"
+                        : "hover:border-border-strong bg-surface/30"
                     }`}
                   >
-                    <div className="flex flex-wrap items-center gap-2">
-                      <RouteIcon className="size-3.5 text-muted-foreground" />
-                      <Mono className="text-muted-foreground">{p.id}</Mono>
-                      <span className="text-sm font-medium">{p.label}</span>
-                      <Chip
-                        tone={
-                          p.continuity > 0.7
-                            ? "positive"
-                            : p.continuity > 0.4
-                              ? "warning"
-                              : "neutral"
-                        }
-                        className="ml-auto"
-                      >
-                        {(p.continuity * 100).toFixed(0)}% continuity
-                      </Chip>
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        <span className="mono text-xs font-semibold text-primary">
+                          #{String(idx + 1).padStart(2, "0")}
+                        </span>
+                        <span className="text-sm font-semibold text-foreground">
+                          {p.label}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Chip
+                          tone={
+                            p.continuity > 0.7
+                              ? "positive"
+                              : p.continuity > 0.4
+                                ? "warning"
+                                : "neutral"
+                          }
+                        >
+                          {(p.continuity * 100).toFixed(0)}% Continuity
+                        </Chip>
+                        <Button
+                          size="sm"
+                          variant={active ? "default" : "outline"}
+                          className="h-7 text-xs"
+                          onClick={() => setFocusedPath(active ? null : p.id)}
+                        >
+                          {active ? "Exit Focus" : "Focus Path"}
+                        </Button>
+                      </div>
                     </div>
-                    <p className="mt-2 text-sm text-muted-foreground">
+                    <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
                       {p.verdict}
                     </p>
-                    <div className="mono mt-2.5 flex flex-wrap gap-x-4 gap-y-1 border-t border-border pt-2.5 text-[11px] text-muted-foreground">
+                    <div className="mono mt-3 flex flex-wrap gap-x-4 gap-y-1.5 border-t border-border/50 pt-2.5 text-[11px] text-muted-foreground">
                       <span>{p.valuePreserved} preserved</span>
+                      <span>·</span>
                       <span>{p.hops} hops</span>
-                      <span>ends at {NODE_KIND_LABEL[p.endpointKind]}</span>
-                      <span className="ml-auto">
-                        {p.confidence}% confidence
+                      <span>·</span>
+                      <span>Endpoint: {NODE_KIND_LABEL[p.endpointKind]}</span>
+                      <span className="ml-auto font-medium text-foreground">
+                        {p.confidence}% Confidence
                       </span>
                     </div>
-                  </button>
+                  </div>
                 );
               })}
-              <p className="text-xs text-muted-foreground">
-                Selecting a path dims everything outside it, so the canvas shows
-                only the movement that supports that hypothesis.
-              </p>
             </TabsContent>
 
+            {/* Tab 2: Entity & VASP Intelligence */}
             <TabsContent value="entities" className="mt-3 space-y-2.5">
               {entities.length === 0 ? (
                 <EmptyState
@@ -337,150 +421,169 @@ function WorkspacePage() {
                 />
               ) : (
                 entities.map((e) => (
-                  <article key={e.id} className="panel px-4 py-3.5">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="text-sm font-medium">{e.name}</span>
-                      <Chip tone="intel">{e.type}</Chip>
-                      <Chip
-                        tone={
-                          e.attributionStrength > 0.7 ? "positive" : "warning"
-                        }
-                        className="ml-auto"
-                      >
-                        {(e.attributionStrength * 100).toFixed(0)}% attribution
-                      </Chip>
+                  <article key={e.id} className="panel p-4 bg-surface/30 space-y-3">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <div>
+                        <h3 className="text-sm font-semibold text-foreground">{e.name}</h3>
+                        <p className="text-xs text-muted-foreground">
+                          Proximity: {e.proximityHops} hops from target wallet
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Chip tone="intel">{e.type}</Chip>
+                        <Chip tone={e.attributionStrength > 0.7 ? "positive" : "warning"}>
+                          {(e.attributionStrength * 100).toFixed(0)}% Attribution Strength
+                        </Chip>
+                      </div>
                     </div>
-                    <ul className="mt-2.5 space-y-1">
-                      {e.rationale.map((r) => (
-                        <li
-                          key={r}
-                          className="flex gap-2 text-sm text-muted-foreground"
-                        >
-                          <span className="mt-2 size-1 shrink-0 rounded-full bg-muted-foreground" />
-                          {r}
-                        </li>
-                      ))}
-                    </ul>
-                    <div className="mono mt-2.5 flex flex-wrap gap-x-4 gap-y-1 border-t border-border pt-2.5 text-[11px] text-muted-foreground">
-                      <span>hop {e.proximityHops}</span>
-                      <span>{e.networks.join(", ")}</span>
-                      <span>{e.associatedAddresses} associated addresses</span>
-                      <span>{e.sourceFreshness}</span>
+                    <div className="rounded-md border border-border/60 bg-elevated/40 p-3 space-y-1.5 text-xs text-muted-foreground">
+                      <span className="font-semibold text-foreground block text-[11px] uppercase mono">
+                        Attribution Rationale:
+                      </span>
+                      <ul className="list-disc pl-4 space-y-1 text-[11px]">
+                        {e.rationale.map((r, i) => (
+                          <li key={i}>{r}</li>
+                        ))}
+                      </ul>
                     </div>
                   </article>
                 ))
               )}
             </TabsContent>
 
+            {/* Tab 3: Structural & Behavioural Signals */}
             <TabsContent value="signals" className="mt-3 space-y-2.5">
-              {signals.map((s) => (
-                <article key={s.id} className="panel px-4 py-3.5">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <ShieldAlert className="size-3.5 text-muted-foreground" />
-                    <span className="text-sm font-medium">{s.pattern}</span>
-                    <SeverityBadge severity={s.severity} />
-                    <span className="mono ml-auto text-[11px] text-muted-foreground">
-                      {s.observedAt}
-                    </span>
+              {signals.map((sig) => (
+                <article key={sig.id} className="panel p-4 bg-surface/30 space-y-2">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <SeverityBadge severity={sig.severity} />
+                      <span className="text-sm font-semibold text-foreground">
+                        {sig.pattern}
+                      </span>
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-7 text-xs"
+                      onClick={() =>
+                        recordFinding.mutate({
+                          title: sig.pattern,
+                          description: sig.description,
+                          severity: sig.severity,
+                          confidence: 85,
+                          type: "behavioural_pattern",
+                        })
+                      }
+                    >
+                      Record as finding
+                    </Button>
                   </div>
-                  <p className="mt-2 text-sm text-muted-foreground">
-                    {s.description}
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    {sig.description}
                   </p>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="mt-2 -ml-2"
-                    disabled={recordFinding.isPending}
-                    onClick={() =>
-                      recordFinding.mutate({
-                        title: s.pattern,
-                        description: s.description,
-                        severity: s.severity,
-                        confidence: 72,
-                        type: "behavioural_pattern",
-                      })
-                    }
-                  >
-                    Record as finding
-                  </Button>
                 </article>
               ))}
-              <p className="text-xs text-muted-foreground">
-                Signals describe observed behaviour. They are not conclusions
-                until an investigator records them as a finding.
-              </p>
             </TabsContent>
 
+            {/* Tab 4: Chronological Timeline */}
             <TabsContent value="timeline" className="mt-3">
-              <ol className="panel space-y-0 px-4 py-2">
-                {timeline.map((event, i) => (
-                  <motion.li
-                    key={event.id}
-                    initial={{ opacity: 0, x: -6 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: i * 0.03, duration: 0.22 }}
-                    className="flex gap-3 border-b border-border py-3 last:border-b-0"
-                  >
-                    <div className="mono w-[86px] shrink-0 text-[11px] text-muted-foreground">
-                      <div>{event.at}</div>
-                      <div className="text-foreground">{event.clock}</div>
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-sm font-medium">{event.title}</p>
-                      <p className="mono mt-0.5 text-[11px] text-muted-foreground">
-                        {event.detail}
-                      </p>
-                    </div>
-                    <Chip className="ml-auto shrink-0">{event.kind}</Chip>
-                  </motion.li>
-                ))}
-              </ol>
+              <div className="panel p-4 bg-surface/30">
+                <ol className="space-y-3">
+                  {timeline.map((event, i) => {
+                    const isSelected = activeTimelineFilter === event.id;
+                    return (
+                      <li
+                        key={event.id}
+                        onClick={() => handleTimelineClick(event.id, event.nodeId, event.pathId)}
+                        className={`flex items-start gap-3 p-2.5 rounded-lg border transition-all cursor-pointer ${
+                          isSelected
+                            ? "border-primary bg-primary/10 shadow-sm"
+                            : "border-transparent hover:border-border hover:bg-elevated/40"
+                        }`}
+                      >
+                        <div className="mono w-20 shrink-0 text-[11px] text-muted-foreground pt-0.5">
+                          <span className="font-semibold text-foreground block">{event.clock}</span>
+                          <span>{event.at}</span>
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-xs font-semibold text-foreground">{event.title}</p>
+                          <p className="text-[11px] text-muted-foreground mt-0.5">{event.detail}</p>
+                        </div>
+                        <Chip tone="neutral" className="text-[10px] uppercase">
+                          {event.kind}
+                        </Chip>
+                      </li>
+                    );
+                  })}
+                </ol>
+              </div>
             </TabsContent>
           </Tabs>
         </div>
 
-        {/* Inspector */}
-        <aside className="panel h-fit xl:sticky xl:top-[88px]">
-          <div className="flex items-center gap-2 border-b border-border px-4 py-3">
-            <Layers className="size-4 text-muted-foreground" />
-            <p className="text-sm font-semibold">Inspector</p>
-            <Chip className="ml-auto">
+        {/* Right Column: 3-Tier Structured Inspector (Blueprint Page 32 & 104-105) */}
+        <aside className="panel h-fit xl:sticky xl:top-[88px] bg-surface/40 overflow-hidden">
+          <div className="flex items-center gap-2 border-b border-border px-4 py-3 bg-surface/60">
+            <Layers className="size-4 text-primary" />
+            <p className="text-sm font-semibold">Contextual Inspector</p>
+            <Chip className="ml-auto text-[10px]">
               {selectedEdge
-                ? "Transaction"
+                ? "Transaction Edge"
                 : selectedNode
                   ? NODE_KIND_LABEL[selectedNode.kind]
-                  : "Nothing selected"}
+                  : "Overview Mode"}
             </Chip>
           </div>
 
-          <ScrollArea className="max-h-[560px]">
-            <div className="px-4 py-4">
+          <ScrollArea className="max-h-[640px]">
+            <div className="p-4 space-y-4">
               {selectedEdge ? (
-                <div className="space-y-3">
-                  <button
-                    onClick={() => copy(selectedEdge.txHash)}
-                    className="mono flex w-full items-center gap-1.5 break-all rounded-md border border-border bg-elevated/50 px-3 py-2 text-left text-[11px] hover:text-foreground"
-                  >
-                    {truncateAddress(selectedEdge.txHash, 18, 10)}
-                    <Copy className="ml-auto size-3 shrink-0" />
-                  </button>
-                  <dl className="mono space-y-2 text-[12px]">
-                    <Row label="value" value={selectedEdge.value} />
-                    <Row label="asset" value={selectedEdge.asset} />
-                    <Row label="observed" value={selectedEdge.timestamp} />
-                    <Row
-                      label="continuity"
-                      value={`${(selectedEdge.continuity * 100).toFixed(0)}%`}
-                    />
-                    <Row
-                      label="on paths"
-                      value={selectedEdge.pathIds.join(", ")}
-                    />
-                  </dl>
+                /* Inspector for Transaction Edge */
+                <div className="space-y-4">
+                  <div>
+                    <span className="mono text-[10px] text-muted-foreground uppercase tracking-wider block">
+                      Transaction Hash
+                    </span>
+                    <button
+                      onClick={() => copy(selectedEdge.txHash)}
+                      className="mono mt-1 flex w-full items-center gap-1.5 break-all rounded-md border border-border bg-elevated/50 px-3 py-2 text-left text-[11px] hover:text-foreground transition-colors"
+                    >
+                      <span>{truncateAddress(selectedEdge.txHash, 16, 8)}</span>
+                      <Copy className="ml-auto size-3 shrink-0 text-muted-foreground" />
+                    </button>
+                  </div>
+
+                  {/* 1. Directly Observed Facts */}
+                  <div className="p-3 rounded-lg border border-border/80 bg-background/60 space-y-2">
+                    <span className="mono text-[10px] font-semibold text-primary uppercase tracking-wider block">
+                      01 // Directly Observed On-Chain
+                    </span>
+                    <dl className="mono space-y-1.5 text-[11px]">
+                      <Row label="Transfer Value" value={selectedEdge.value} />
+                      <Row label="Asset" value={selectedEdge.asset} />
+                      <Row label="Timestamp" value={selectedEdge.timestamp} />
+                    </dl>
+                  </div>
+
+                  {/* 2. Value Continuity Scoring */}
+                  <div className="p-3 rounded-lg border border-border/80 bg-background/60 space-y-2">
+                    <span className="mono text-[10px] font-semibold text-positive uppercase tracking-wider block">
+                      02 // Continuity & Paths
+                    </span>
+                    <dl className="mono space-y-1.5 text-[11px]">
+                      <Row
+                        label="Continuity Score"
+                        value={`${(selectedEdge.continuity * 100).toFixed(0)}%`}
+                      />
+                      <Row label="Associated Paths" value={selectedEdge.pathIds.join(", ")} />
+                    </dl>
+                  </div>
+
                   <Button
                     variant="outline"
                     size="sm"
-                    className="w-full"
+                    className="w-full gap-1.5 text-xs"
                     disabled={pinEvidence.isPending}
                     onClick={() =>
                       pinEvidence.mutate({
@@ -490,112 +593,144 @@ function WorkspacePage() {
                       })
                     }
                   >
-                    <Pin className="size-4" />
-                    Pin transaction as evidence
+                    <Pin className="size-3.5" />
+                    Pin Transfer as Evidence
                   </Button>
                 </div>
               ) : selectedNode ? (
-                <div className="space-y-3">
+                /* Inspector for Wallet / Node */
+                <div className="space-y-4">
                   <div>
-                    <p className="text-sm font-semibold">
+                    <span className="text-sm font-semibold text-foreground block">
                       {selectedNode.label}
-                    </p>
+                    </span>
                     <button
                       onClick={() => copy(selectedNode.address)}
-                      className="mono mt-1 flex w-full items-center gap-1.5 break-all rounded-md border border-border bg-elevated/50 px-3 py-2 text-left text-[11px] hover:text-foreground"
+                      className="mono mt-1 flex w-full items-center gap-1.5 break-all rounded-md border border-border bg-elevated/50 px-3 py-2 text-left text-[11px] hover:text-foreground transition-colors"
                     >
-                      {truncateAddress(selectedNode.address, 18, 10)}
-                      <Copy className="ml-auto size-3 shrink-0" />
+                      <span>{selectedNode.address}</span>
+                      <Copy className="ml-auto size-3 shrink-0 text-muted-foreground" />
                     </button>
                   </div>
-                  <dl className="mono space-y-2 text-[12px]">
-                    <Row label="hop" value={String(selectedNode.hop)} />
-                    <Row label="value in" value={selectedNode.valueIn} />
-                    <Row label="value out" value={selectedNode.valueOut} />
-                    <Row
-                      label="connected"
-                      value={`${selectedNode.connectedAddresses} addresses`}
-                    />
-                    <Row
-                      label="on paths"
-                      value={`${selectedNode.relevantPaths}`}
-                    />
-                    <Row label="first seen" value={selectedNode.firstSeen} />
-                  </dl>
-                  {selectedNode.riskNote ? (
-                    <p className="rounded-md border border-warning/30 bg-warning/8 px-3 py-2 text-xs text-warning">
-                      {selectedNode.riskNote}
-                    </p>
-                  ) : null}
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full"
-                    disabled={pinEvidence.isPending}
-                    onClick={() =>
-                      pinEvidence.mutate({
-                        title: `Wallet ${truncateAddress(selectedNode.address, 10, 6)}`,
-                        description: `${NODE_KIND_LABEL[selectedNode.kind]} at hop ${selectedNode.hop}. In ${selectedNode.valueIn}, out ${selectedNode.valueOut}.`,
-                        type: "wallet",
-                      })
-                    }
-                  >
-                    <Pin className="size-4" />
-                    Pin wallet as evidence
-                  </Button>
+
+                  {/* 1. Directly Observed Facts */}
+                  <div className="p-3 rounded-lg border border-border/80 bg-background/60 space-y-2">
+                    <span className="mono text-[10px] font-semibold text-primary uppercase tracking-wider block">
+                      01 // Directly Observed On-Chain
+                    </span>
+                    <dl className="mono space-y-1.5 text-[11px]">
+                      <Row label="Graph Hop" value={String(selectedNode.hop)} />
+                      <Row label="Inflow" value={selectedNode.valueIn} />
+                      <Row label="Outflow" value={selectedNode.valueOut} />
+                      <Row label="Connected Counterparties" value={`${selectedNode.connectedAddresses}`} />
+                      <Row label="First Activity" value={selectedNode.firstSeen} />
+                    </dl>
+                  </div>
+
+                  {/* 2. Attribution Intelligence */}
+                  <div className="p-3 rounded-lg border border-border/80 bg-background/60 space-y-2">
+                    <span className="mono text-[10px] font-semibold text-intel uppercase tracking-wider block">
+                      02 // Attribution Intelligence
+                    </span>
+                    <dl className="mono space-y-1.5 text-[11px]">
+                      <Row label="Entity Classification" value={NODE_KIND_LABEL[selectedNode.kind]} />
+                      <Row label="On Critical Paths" value={`${selectedNode.relevantPaths} paths`} />
+                    </dl>
+                  </div>
+
+                  {/* 3. Action Directives (Blueprint Page 105) */}
+                  <div className="space-y-2 pt-2 border-t border-border/60">
+                    <Button
+                      variant="default"
+                      size="sm"
+                      className="w-full gap-1.5 text-xs"
+                      onClick={() => handleTraceFromNode(selectedNode.address)}
+                    >
+                      <Zap className="size-3.5" />
+                      Trace Forward From Here →
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full gap-1.5 text-xs"
+                      disabled={pinEvidence.isPending}
+                      onClick={() =>
+                        pinEvidence.mutate({
+                          title: `Wallet ${truncateAddress(selectedNode.address, 10, 6)}`,
+                          description: `${NODE_KIND_LABEL[selectedNode.kind]} at hop ${selectedNode.hop}. In ${selectedNode.valueIn}, out ${selectedNode.valueOut}.`,
+                          type: "wallet",
+                        })
+                      }
+                    >
+                      <Pin className="size-3.5" />
+                      Pin Wallet to Evidence Vault
+                    </Button>
+                  </div>
                 </div>
               ) : (
-                <div className="space-y-3 text-sm text-muted-foreground">
-                  <p>
-                    Select a wallet or a transfer on the canvas to inspect its
-                    traced values, its position in the graph and why it is in
-                    scope.
+                /* Default Overview State */
+                <div className="space-y-3.5 text-xs text-muted-foreground">
+                  <div className="flex items-center gap-2 text-foreground font-semibold">
+                    <Compass className="size-4 text-primary" />
+                    Investigation Scope & Bounds
+                  </div>
+                  <p className="leading-relaxed">
+                    Select any wallet or transfer edge on the interactive graph to inspect verified cryptographic records, attribution intelligence, and path continuity hypotheses.
                   </p>
                   <div className="mono space-y-2 border-t border-border pt-3 text-[11px]">
                     <Row
-                      label="trace window"
+                      label="Trace Window"
                       value={
                         record.window_start
                           ? `${new Date(record.window_start).toLocaleDateString()} → ${
                               record.window_end
-                                ? new Date(
-                                    record.window_end,
-                                  ).toLocaleDateString()
+                                ? new Date(record.window_end).toLocaleDateString()
                                 : "now"
                             }`
                           : "unbounded"
                       }
                     />
                     <Row
-                      label="min value"
+                      label="Min Value Floor"
                       value={
                         record.min_value
                           ? `${record.min_value.toLocaleString()} USDT`
-                          : "no floor"
+                          : "none"
                       }
                     />
-                    <Row label="max nodes" value={`${graph.bounds.maxNodes}`} />
+                    <Row label="Max Node Cap" value={`${graph.bounds.maxNodes}`} />
                   </div>
-                  <p className="flex items-center gap-1.5 text-xs">
-                    <Clock className="size-3.5" />
-                    Scope is deliberately bounded — TRACIFY never crawls the
-                    whole chain.
-                  </p>
                 </div>
               )}
             </div>
           </ScrollArea>
         </aside>
       </div>
+
+      {/* Interactive Report Builder Dialog */}
+      <ReportBuilderDialog
+        open={reportDialogOpen}
+        onOpenChange={setReportDialogOpen}
+        data={{
+          investigation: record,
+          caseRef: caseObj?.case_ref,
+          paths,
+          entities,
+          signals,
+          timeline,
+          findingsCount: 0,
+          evidenceCount: 0,
+        }}
+      />
     </div>
   );
 }
 
 function Row({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex items-baseline justify-between gap-3 border-b border-border pb-1.5 last:border-b-0">
-      <dt className="text-muted-foreground">{label}</dt>
-      <dd className="truncate text-right text-foreground">{value}</dd>
+    <div className="flex items-baseline justify-between gap-3 border-b border-border/40 pb-1 last:border-b-0">
+      <dt className="text-muted-foreground/80">{label}</dt>
+      <dd className="truncate text-right text-foreground font-medium">{value}</dd>
     </div>
   );
 }
