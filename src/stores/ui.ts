@@ -29,6 +29,9 @@ export const useUIStore = create<UIState>((set) => ({
     set({ startInvestigationOpen }),
   presetCaseId: null,
   setPresetCaseId: (presetCaseId) => set({ presetCaseId }),
+  openInvestigationModal: (caseId = null) =>
+    set({ presetCaseId: caseId, startInvestigationOpen: true }),
+
 }));
 
 /** Workspace-local selection state for the investigation canvas + inspector. */
