@@ -14,14 +14,19 @@ import {
   setBackendToken,
 } from "./client";
 import type {
+  AiSystemsStatus,
   AlertRecord,
   AlertStatus,
   AttributionSummary,
+  BackendInvestigation,
   BackendUser,
+  CopilotMode,
+  CopilotResponse,
   Complaint,
   ComplaintSource,
   FraudType,
   LeaReport,
+  RoutePredictionResult,
   TriageQueue,
 } from "./backend-types";
 
@@ -220,3 +225,45 @@ export const backendProvidersQuery = (enabled = true) =>
         "/intelligence/providers",
       ),
   });
+
+/* ---------------- Dual AI ---------------- */
+
+export const aiStatusQuery = (enabled = true) =>
+  queryOptions({
+    queryKey: ["backend", "ai", "status"],
+    enabled: backendConfigured() && enabled,
+    retry: false,
+    staleTime: 60_000,
+    queryFn: () => backendRequest<AiSystemsStatus>("/ai/status"),
+  });
+
+export const backendInvestigationsQuery = (enabled = true) =>
+  queryOptions({
+    queryKey: ["backend", "investigations"],
+    enabled: backendConfigured() && enabled,
+    retry: false,
+    queryFn: () =>
+      backendRequest<Paginated<BackendInvestigation>>("/investigations", {
+        query: { page: 1, limit: 50 },
+      }),
+  });
+
+/** AI System 1 — ask the platform model which route the money took. */
+export async function predictMoneyRoute(investigationId: string) {
+  return backendRequest<RoutePredictionResult>(
+    `/ai/investigations/${investigationId}/route-prediction`,
+    { method: "POST" },
+  );
+}
+
+/** AI System 2 — one grounded copilot turn about a stored investigation. */
+export async function askCopilot(input: {
+  investigationId: string;
+  mode: CopilotMode;
+  question?: string;
+}) {
+  return backendRequest<CopilotResponse>(`/ai/investigations/${input.investigationId}/copilot`, {
+    method: "POST",
+    body: { mode: input.mode, ...(input.question ? { question: input.question } : {}) },
+  });
+}
