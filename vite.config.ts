@@ -20,11 +20,18 @@ export default defineConfig(({ command }) => ({
       },
     }),
     viteReact(),
+    // Vercel builds want its own output layout; every other target (including
+    // the Lovable platform build) expects the Worker bundle in `dist/`.
     command === "build"
-      ? nitro({
-          defaultPreset: "vercel",
-          noExternals: true,
-        })
+      ? nitro(
+          process.env['VERCEL']
+            ? { defaultPreset: "vercel", noExternals: true }
+            : {
+                defaultPreset: "cloudflare_module",
+                noExternals: true,
+                output: { dir: "dist" },
+              },
+        )
       : null,
   ],
 }));

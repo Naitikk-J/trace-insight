@@ -35,7 +35,7 @@ import type {
 
 export interface ReportData {
   investigation: InvestigationRecord;
-  caseRef?: string;
+  caseRef?: string | undefined;
   paths: TracePath[];
   entities: EntityCandidate[];
   signals: BehaviourSignal[];
