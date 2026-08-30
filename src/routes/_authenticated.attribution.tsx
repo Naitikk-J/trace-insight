@@ -267,35 +267,33 @@ function AttributionConsole() {
 
           <section className="panel px-4 py-4">
             <p className="label-caps mb-2">Why this typology</p>
-            <p className="text-sm text-muted-foreground">{result.typology.rationale}</p>
+            <p className="text-sm text-muted-foreground">
+              {result.typology.label} · {Math.round((result.typology.confidence ?? 0) * 100)}%
+              confidence, driven by the on-chain features below.
+            </p>
             <div className="mt-3 space-y-1.5">
-              {result.typology.drivers.map((d) => (
-                <div key={d.feature} className="flex items-center gap-3">
-                  <span className="w-48 shrink-0 text-[12px] text-muted-foreground">
-                    {d.label}
-                  </span>
-                  <div className="h-1.5 flex-1 rounded-full bg-secondary">
-                    <div
-                      className={d.weight >= 0 ? "h-1.5 rounded-full bg-intel" : "h-1.5 rounded-full bg-muted-foreground"}
-                      style={{ width: `${Math.min(100, Math.abs(d.weight) * 100)}%` }}
-                    />
+              {(result.typology.drivers ?? []).map((d) => {
+                const weight = d.contribution ?? 0;
+                return (
+                  <div key={d.feature} className="flex items-center gap-3">
+                    <span className="w-48 shrink-0 text-[12px] text-muted-foreground">
+                      {d.note ?? d.feature}
+                    </span>
+                    <div className="h-1.5 flex-1 rounded-full bg-secondary">
+                      <div
+                        className={weight >= 0 ? "h-1.5 rounded-full bg-intel" : "h-1.5 rounded-full bg-muted-foreground"}
+                        style={{ width: `${Math.min(100, Math.abs(weight) * 100)}%` }}
+                      />
+                    </div>
+                    <Mono className="w-14 text-right text-[11px] text-muted-foreground">
+                      {weight.toFixed(2)}
+                    </Mono>
                   </div>
-                  <Mono className="w-14 text-right text-[11px] text-muted-foreground">
-                    {d.weight.toFixed(2)}
-                  </Mono>
-                </div>
-              ))}
+                );
+              })}
             </div>
-            {result.typology.alternatives.length > 0 ? (
-              <div className="mt-3 flex flex-wrap gap-1.5">
-                {result.typology.alternatives.map((alt) => (
-                  <Chip key={alt.type}>
-                    {alt.label} · {Math.round(alt.confidence * 100)}%
-                  </Chip>
-                ))}
-              </div>
-            ) : null}
           </section>
+
 
           <section className="panel px-4 py-4">
             <p className="label-caps mb-2">Signals & exposure</p>
