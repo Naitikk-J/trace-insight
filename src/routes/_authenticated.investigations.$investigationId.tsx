@@ -47,6 +47,7 @@ import {
 } from "@/lib/api/queries";
 import { chainLabel, truncateAddress } from "@/lib/domain";
 import { intelligence } from "@/services/intelligence";
+import type { GraphEdge, GraphNode } from "@/services/intelligence";
 import {
   addressIntelligenceQuery,
   addressNeighboursQuery,
