@@ -12,7 +12,10 @@ interface UIState {
   /** Pre-selects a case when opening the start-investigation dialog. */
   presetCaseId: string | null;
   setPresetCaseId: (id: string | null) => void;
+  /** Opens the start-investigation dialog, optionally pre-scoped to a case. */
+  openInvestigationModal: (caseId?: string | null) => void;
 }
+
 
 export const useUIStore = create<UIState>((set) => ({
   sidebarCollapsed: false,
