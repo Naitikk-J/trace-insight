@@ -49,9 +49,10 @@ export async function predictInvestigationRoutes(
   );
 
   await recordAudit({
-    actor: user.id,
+    actorId: user.id,
     action: "ml.route.predict",
-    resource: `investigation:${investigation._id.toString()}`,
+    resource: "investigation",
+    resourceId: investigation._id.toString(),
     metadata: {
       model: `${prediction.modelId}@${prediction.modelVersion}`,
       candidates: prediction.ranked.length,
@@ -106,9 +107,10 @@ export async function copilotForInvestigation(
   });
 
   await recordAudit({
-    actor: user.id,
+    actorId: user.id,
     action: "llm.copilot.ask",
-    resource: `investigation:${investigation._id.toString()}`,
+    resource: "investigation",
+    resourceId: investigation._id.toString(),
     metadata: {
       mode: input.mode,
       provider: answer.provider,
