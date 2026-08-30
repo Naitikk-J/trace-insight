@@ -127,10 +127,29 @@ export const env = {
     .split(",")
     .map((key) => key.trim())
     .filter(Boolean),
-  /** Every origin permitted by CORS. */
+  /**
+   * Every origin permitted by CORS. Entries may contain a single `*` wildcard
+   * in the host part (e.g. `https://*.vercel.app`) so preview deployments of a
+   * known host are allowed without listing every generated URL. A bare `*` is
+   * still rejected in production by the schema above.
+   */
   allowedOrigins: raw.CLIENT_URL.split(",")
     .map((origin) => origin.trim())
     .filter(Boolean),
 } as const;
 
 export type Env = typeof env;
+
+/** True when `origin` matches an allowlist entry, honouring `*` wildcards. */
+export function isOriginAllowed(origin: string): boolean {
+  return env.allowedOrigins.some((entry) => {
+    if (entry === origin) return true;
+    if (!entry.includes("*")) return false;
+    const pattern = entry
+      .split("*")
+      .map((part) => part.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
+      .join("[^./]*");
+    return new RegExp(`^${pattern}$`).test(origin);
+  });
+}
+
