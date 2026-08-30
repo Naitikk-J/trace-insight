@@ -1,12 +1,13 @@
-import type { Request, Response } from "express";
 import { aiSystemsStatus, copilotForAddress, predictRoutesForAddress } from "../services/ai.service";
 import { summariseAttribution } from "../services/attribution.service";
+import { sendSuccess } from "../utils/ApiResponse";
+import { asyncHandler } from "../utils/asyncHandler";
 
-export function status(_req: Request, res: Response): void {
-  res.json({ ok: true, systems: aiSystemsStatus() });
-}
+export const status = asyncHandler(async (_req, res) => {
+  sendSuccess(res, "AI systems", { systems: aiSystemsStatus() });
+});
 
-export async function predictRoute(req: Request, res: Response): Promise<void> {
+export const predictRoute = asyncHandler(async (req, res) => {
   const { chain, address, maxHops, seedValueUsd } = req.body as {
     chain: Parameters<typeof predictRoutesForAddress>[0];
     address: string;
@@ -17,10 +18,13 @@ export async function predictRoute(req: Request, res: Response): Promise<void> {
     ...(maxHops !== undefined ? { maxHops } : {}),
     ...(seedValueUsd !== undefined ? { seedValueUsd } : {}),
   });
-  res.json({ ok: true, attribution: summariseAttribution(attribution), prediction });
-}
+  sendSuccess(res, "Route prediction", {
+    attribution: summariseAttribution(attribution),
+    prediction,
+  });
+});
 
-export async function copilot(req: Request, res: Response): Promise<void> {
+export const copilot = asyncHandler(async (req, res) => {
   const { chain, address, question, maxHops, seedValueUsd } = req.body as {
     chain: Parameters<typeof copilotForAddress>[0];
     address: string;
@@ -32,5 +36,8 @@ export async function copilot(req: Request, res: Response): Promise<void> {
     ...(maxHops !== undefined ? { maxHops } : {}),
     ...(seedValueUsd !== undefined ? { seedValueUsd } : {}),
   });
-  res.json({ ok: true, attribution: summariseAttribution(attribution), copilot: answer });
-}
+  sendSuccess(res, "Copilot answer", {
+    attribution: summariseAttribution(attribution),
+    copilot: answer,
+  });
+});
