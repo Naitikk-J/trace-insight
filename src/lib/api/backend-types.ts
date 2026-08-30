@@ -82,12 +82,11 @@ export interface IntermediaryWallet {
 }
 
 export interface TypologyPrediction {
-  type: FraudType;
+  /** Backend field name for the predicted typology. */
+  typology: FraudType | "unknown";
   label: string;
   confidence: number;
-  rationale: string;
-  drivers: { feature: string; label: string; weight: number }[];
-  alternatives: { type: FraudType; label: string; confidence: number }[];
+  drivers: { feature: string; contribution: number; note: string }[];
 }
 
 export interface BehaviouralSignal {
