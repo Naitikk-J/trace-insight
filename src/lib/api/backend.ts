@@ -295,3 +295,44 @@ export const addressNeighboursQuery = (
       ),
   });
 
+
+/* ---------------- AI systems ---------------- */
+
+export const aiStatusQuery = (enabled = true) =>
+  queryOptions({
+    queryKey: ["backend", "ai", "status"],
+    enabled: backendConfigured() && enabled,
+    retry: false,
+    staleTime: 60_000,
+    queryFn: async () => {
+      const data = await backendRequest<{ systems: AiSystemsStatus }>("/ai/status");
+      return data.systems;
+    },
+  });
+
+export async function predictMoneyRoute(input: {
+  chain: string;
+  address: string;
+  maxHops?: number;
+  seedValueUsd?: number;
+}) {
+  const data = await backendRequest<{ attribution: AttributionSummary; prediction: RoutePrediction }>(
+    "/ai/predict-route",
+    { method: "POST", body: input },
+  );
+  return data;
+}
+
+export async function askCopilot(input: {
+  chain: string;
+  address: string;
+  question: string;
+  maxHops?: number;
+  seedValueUsd?: number;
+}) {
+  const data = await backendRequest<{ attribution: AttributionSummary; copilot: CopilotAnswer }>(
+    "/ai/copilot",
+    { method: "POST", body: input },
+  );
+  return data;
+}
