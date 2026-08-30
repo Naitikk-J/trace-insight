@@ -71,7 +71,7 @@ function AiPage() {
 }
 
 function AiWorkspace() {
-  const [chain, setChain] = useState<string>(BLOCKCHAINS[0] ?? "ethereum");
+  const [chain, setChain] = useState<string>(BLOCKCHAINS[0]?.id ?? "ethereum");
   const [address, setAddress] = useState("");
   const [question, setQuestion] = useState("Explain the most likely laundering route and what to freeze first.");
   const [prediction, setPrediction] = useState<RoutePrediction | null>(null);
@@ -144,7 +144,7 @@ function AiWorkspace() {
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
                 {BLOCKCHAINS.map((c) => (
-                  <SelectItem key={c} value={c} className="capitalize">{c}</SelectItem>
+                  <SelectItem key={c.id} value={c.id}>{c.label}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
