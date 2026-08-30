@@ -85,7 +85,11 @@ function ReportsPage() {
           <Button
             size="sm"
             className="gap-1.5"
-            onClick={() => handleOpenBuilderForInvestigation(investigations.data![0])}
+            onClick={() => {
+              const first = investigations.data?.[0];
+              if (first) handleOpenBuilderForInvestigation(first);
+            }}
+
           >
             <Sparkles className="size-3.5" />
             Assemble New Dossier
