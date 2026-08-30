@@ -30,6 +30,7 @@ import {
   backendInvestigationsQuery,
   predictMoneyRoute,
 } from "@/lib/api/backend";
+import type { AiSystemsStatus } from "@/lib/api/backend-types";
 import { truncateAddress } from "@/lib/domain";
 
 export const Route = createFileRoute("/_authenticated/ai")({
@@ -193,10 +194,8 @@ function AiWorkspace() {
   );
 }
 
-function SystemsStatus({ status }: { status: ReturnType<typeof Object> | undefined }) {
-  const data = status as
-    | import("@/lib/api/backend-types").AiSystemsStatus
-    | undefined;
+function SystemsStatus({ status }: { status: AiSystemsStatus | undefined }) {
+  const data = status;
   if (!data) return null;
 
   return (
