@@ -73,17 +73,19 @@ function AuthPage() {
         if (error) throw error;
         void navigate({ to: "/dashboard" });
       } else {
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           ...values,
           options: { emailRedirectTo: `${window.location.origin}/dashboard` },
         });
         if (error) throw error;
-        toast.success("Account created. Signing you in…");
-        const { error: signInError } =
-          await supabase.auth.signInWithPassword(values);
-        if (signInError) {
-          toast.info("Check your inbox to confirm your email, then sign in.");
+        if (data.session) {
+          toast.success("Account created. Welcome aboard.");
+          void navigate({ to: "/dashboard" });
         } else {
+          toast.success("Account created. Signing you in…");
+          const { error: signInError } =
+            await supabase.auth.signInWithPassword(values);
+          if (signInError) throw signInError;
           void navigate({ to: "/dashboard" });
         }
       }
