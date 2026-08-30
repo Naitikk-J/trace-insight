@@ -242,3 +242,53 @@ export interface BackendUser {
   email: string;
   role: string;
 }
+
+/* ---------------- AI systems ---------------- */
+
+export interface AiSystemsStatus {
+  routeModel: { configured: "baseline" | "remote"; id: string; healthy: boolean };
+  copilot: {
+    configured: string;
+    model: string;
+    egress: { fullAddresses: boolean; victimDetails: boolean };
+  };
+}
+
+export interface RouteFeatureContribution {
+  feature: string;
+  weight: number;
+  value: number;
+  contribution: number;
+}
+
+export interface ScoredRoute {
+  path: string[];
+  txHashes: string[];
+  endpoint: string;
+  endpointEntity?: string;
+  endpointIsVasp: boolean;
+  valueUsd: number;
+  hops: number;
+  features: Record<string, number>;
+  riskScore: number;
+  priority: "critical" | "high" | "medium" | "low";
+  contributions: RouteFeatureContribution[];
+}
+
+export interface RoutePrediction {
+  rootAddress: string;
+  generatedAt: string;
+  model: { id: string; kind: "baseline" | "remote"; version: string };
+  winningRoute: ScoredRoute | null;
+  routes: ScoredRoute[];
+  note: string;
+}
+
+export interface CopilotAnswer {
+  answer: string;
+  provider: string;
+  model: string;
+  external: boolean;
+  dataPolicy: { fullAddresses: boolean; victimDetails: boolean };
+  groundingKeys: number;
+}

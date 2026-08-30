@@ -17,6 +17,7 @@ import {
   Search,
   Settings,
   ShieldAlert,
+  Sparkles,
   Vault,
 } from "lucide-react";
 
@@ -39,6 +40,7 @@ const NAV = [
   { to: "/complaints", label: "Complaints", icon: Inbox },
   { to: "/alerts", label: "Alerts", icon: Siren },
   { to: "/attribution", label: "Attribution", icon: Building2 },
+  { to: "/ai", label: "AI copilot", icon: Sparkles },
   { to: "/cases", label: "Cases", icon: FolderOpen },
   { to: "/investigations", label: "Investigations", icon: Radar },
   { to: "/findings", label: "Findings", icon: ShieldAlert },
