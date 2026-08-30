@@ -47,7 +47,10 @@ import {
 } from "@/lib/api/queries";
 import { chainLabel, truncateAddress } from "@/lib/domain";
 import { intelligence } from "@/services/intelligence";
-import type { GraphEdge, GraphNode, TracePath } from "@/services/intelligence";
+import {
+  addressIntelligenceQuery,
+  addressNeighboursQuery,
+} from "@/lib/api/backend";
 import { useUIStore, useWorkspaceStore } from "@/stores/ui";
 
 export const Route = createFileRoute(
@@ -161,9 +164,27 @@ function WorkspacePage() {
 
   const selectedNode: GraphNode | null =
     selection.kind === "wallet"
-      ? (graph.nodes.find((n) => n.id === selection.id) ?? null)
+      ? (graph?.nodes.find((n) => n.id === selection.id) ?? null)
       : null;
-  const primaryPath = paths[0];
+  const primaryPath = paths ? paths[0] : null;
+
+  const liveIntel = useQuery(
+    addressIntelligenceQuery(
+      record.blockchain,
+      selectedNode?.address ?? "",
+      Boolean(selectedNode),
+    ),
+  );
+
+  const liveNeighbours = useQuery(
+    addressNeighboursQuery(
+      record.blockchain,
+      selectedNode?.address ?? "",
+      "out",
+      5,
+      Boolean(selectedNode),
+    ),
+  );
 
   const handleTraceFromNode = (address: string) => {
     openInvestigationModal(record.case_id);
@@ -626,6 +647,68 @@ function WorkspacePage() {
                       <Row label="First Activity" value={selectedNode.firstSeen} />
                     </dl>
                   </div>
+
+                  {/* Live Backend Intelligence from Express Service */}
+                  {liveIntel.data && (
+                    <div className="p-3 rounded-lg border border-intel/40 bg-intel/5 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="mono text-[10px] font-semibold text-intel uppercase tracking-wider block">
+                          Live Chain Telemetry
+                        </span>
+                        <Chip tone={liveIntel.data.riskScore > 60 ? "critical" : "positive"}>
+                          Risk: {liveIntel.data.riskScore}/100
+                        </Chip>
+                      </div>
+                      <dl className="mono space-y-1 text-[11px]">
+                        <Row
+                          label="Total Received"
+                          value={`$${liveIntel.data.address.totalReceivedUsd.toLocaleString()}`}
+                        />
+                        <Row
+                          label="Total Spent"
+                          value={`$${liveIntel.data.address.totalSpentUsd.toLocaleString()}`}
+                        />
+                        <Row
+                          label="Current Balance"
+                          value={`$${liveIntel.data.address.balanceUsd.toLocaleString()}`}
+                        />
+                        <Row label="Data Provider" value={liveIntel.data.sourceLabel} />
+                      </dl>
+                      {liveIntel.data.address.tags.length > 0 && (
+                        <div className="flex flex-wrap gap-1 pt-1 border-t border-border/40">
+                          {liveIntel.data.address.tags.map((tag) => (
+                            <Chip key={tag} tone="intel" className="text-[9px]">
+                              {tag}
+                            </Chip>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Live Counterparty Neighbours */}
+                  {liveNeighbours.data && liveNeighbours.data.neighbours.length > 0 && (
+                    <div className="p-3 rounded-lg border border-border/80 bg-background/60 space-y-2">
+                      <span className="mono text-[10px] font-semibold text-foreground uppercase tracking-wider block">
+                        Direct Counterparties ({liveNeighbours.data.neighbours.length})
+                      </span>
+                      <div className="space-y-1.5">
+                        {liveNeighbours.data.neighbours.map((nbr) => (
+                          <div
+                            key={nbr.address}
+                            className="flex items-center justify-between text-[10px] mono p-1.5 rounded bg-surface/50 border border-border/40"
+                          >
+                            <span className="truncate max-w-[130px]" title={nbr.address}>
+                              {nbr.label ? nbr.label : truncateAddress(nbr.address, 6, 4)}
+                            </span>
+                            <span className="text-muted-foreground">
+                              ${nbr.valueUsd.toLocaleString()} ({nbr.txCount} txs)
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
                   {/* 2. Attribution Intelligence */}
                   <div className="p-3 rounded-lg border border-border/80 bg-background/60 space-y-2">

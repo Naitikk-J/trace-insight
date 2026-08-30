@@ -220,3 +220,78 @@ export const backendProvidersQuery = (enabled = true) =>
         "/intelligence/providers",
       ),
   });
+
+/* ---------------- Address Intelligence & Neighbours ---------------- */
+
+export interface AddressIntelligenceResponse {
+  source: string;
+  sourceLabel: string;
+  address: {
+    address: string;
+    chain: string;
+    isVasp: boolean;
+    label: string | null;
+    tags: string[];
+    totalReceivedUsd: number;
+    totalSpentUsd: number;
+    balanceUsd: number;
+    category?: string;
+  };
+  riskScore: number;
+  attribution: {
+    isVasp: boolean;
+    topLabel: string | null;
+    tagCount: number;
+  };
+}
+
+export const addressIntelligenceQuery = (
+  chain: string,
+  address: string,
+  enabled = true,
+) =>
+  queryOptions({
+    queryKey: ["backend", "address-intel", chain, address],
+    enabled: backendConfigured() && enabled && Boolean(address),
+    retry: false,
+    staleTime: 60_000,
+    queryFn: () =>
+      backendRequest<AddressIntelligenceResponse>(
+        `/intelligence/addresses/${chain.toLowerCase()}/${address}`,
+      ),
+  });
+
+export interface AddressNeighboursResponse {
+  source: string;
+  sourceLabel: string;
+  address: string;
+  direction: "in" | "out";
+  totalValueUsd: number;
+  neighbours: {
+    address: string;
+    label: string | null;
+    isVasp: boolean;
+    valueUsd: number;
+    txCount: number;
+  }[];
+}
+
+export const addressNeighboursQuery = (
+  chain: string,
+  address: string,
+  direction: "in" | "out" = "out",
+  limit = 10,
+  enabled = true,
+) =>
+  queryOptions({
+    queryKey: ["backend", "address-neighbours", chain, address, direction, limit],
+    enabled: backendConfigured() && enabled && Boolean(address),
+    retry: false,
+    staleTime: 60_000,
+    queryFn: () =>
+      backendRequest<AddressNeighboursResponse>(
+        `/intelligence/addresses/${chain.toLowerCase()}/${address}/neighbours`,
+        { query: { direction, limit } },
+      ),
+  });
+
