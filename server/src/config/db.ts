@@ -19,7 +19,10 @@ export function databaseState(): DbState {
 export async function connectDatabase(): Promise<void> {
   // Fail fast rather than queueing writes against a database that is not there.
   mongoose.set("strictQuery", true);
-  mongoose.set("sanitizeFilter", true);
+  // Operator injection is stripped from every request payload by sanitizeRequest,
+  // so the global filter sanitizer is redundant here — and it would wrap trusted
+  // internal operator queries ($in/$exists) in $eq, breaking them at cast time.
+  mongoose.set("sanitizeFilter", false);
   mongoose.set("bufferCommands", false);
 
   mongoose.connection.on("disconnected", () => {
