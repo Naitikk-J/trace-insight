@@ -242,3 +242,108 @@ export interface BackendUser {
   email: string;
   role: string;
 }
+
+/* ---------------- Dual AI: platform risk model + investigator copilot ------- */
+
+export const ML_BANDS = ["low", "moderate", "elevated", "high", "severe"] as const;
+export type MlBand = (typeof ML_BANDS)[number];
+export type MlPriority = "routine" | "priority" | "urgent";
+
+/** One feature's signed contribution to a route score — the explanation. */
+export interface FeatureContribution {
+  feature: string;
+  value: number;
+  weight: number;
+  contribution: number;
+  note: string;
+}
+
+/** The platform model's verdict on one candidate money route. */
+export interface RouteCandidatePrediction {
+  routeId: string;
+  addresses: string[];
+  routeScore: number;
+  band: MlBand;
+  priority: MlPriority;
+  confidence: number;
+  contributions: FeatureContribution[];
+  rationale: string;
+  features: Record<string, number>;
+  featureSchemaVersion: string;
+  modelId: string;
+  modelVersion: string;
+  source: "baseline" | "remote";
+  degradedReason?: string;
+}
+
+export interface RoutePredictionResult {
+  investigationId: string;
+  reference: string;
+  predicted: RouteCandidatePrediction | null;
+  ranked: RouteCandidatePrediction[];
+  modelId: string;
+  modelVersion: string;
+  featureSchemaVersion: string;
+  source: "baseline" | "remote";
+  degraded: boolean;
+  degradedReason?: string;
+  latencyMs: number;
+}
+
+export type CopilotMode = "answer" | "explain-route" | "draft-summary" | "next-steps";
+
+export interface CopilotResponse {
+  investigationId: string;
+  mode: CopilotMode;
+  content: string;
+  fallback: boolean;
+  fallbackReason?: string;
+  provider: string;
+  model: string;
+  dataPolicy: string;
+  groundingKeys: string[];
+  usage?: { promptTokens?: number; completionTokens?: number; totalTokens?: number };
+}
+
+export interface AiSystemsStatus {
+  riskModel: {
+    mode: "mock" | "remote";
+    active: "baseline" | "remote";
+    featureSchemaVersion: string;
+    baseline: { id: string; version: string; explainable: boolean };
+    remote: { configured: boolean; reachable: boolean; version: string | null; detail?: string };
+    demoMode: boolean;
+  };
+  copilot: {
+    enabled: boolean;
+    provider: string;
+    model: string | null;
+    dataPolicy: string;
+    maxTokens: number;
+    timeoutMs: number;
+    capabilities: string[];
+    restrictions: string[];
+  };
+  boundary: { riskModel: string; copilot: string };
+}
+
+/** Backend investigation record (the intelligence service's own trace store). */
+export interface BackendInvestigation {
+  id: string;
+  reference: string;
+  title: string;
+  chain: string;
+  rootAddress: string;
+  status: string;
+  riskScore: number;
+  dataSource: string;
+  direction: string;
+  metrics: {
+    addressesTouched: number;
+    hopsTraced: number;
+    valueTracedUsd: number;
+    vaspTouchpoints: number;
+    retainedValuePct: number;
+  };
+  createdAt: string;
+}

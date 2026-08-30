@@ -34,7 +34,37 @@ const envSchema = z
       z.string().min(16, "INTAKE_API_KEYS entries must be long random values").optional(),
     ),
 
+    // --- AI SYSTEM 1: VASPTRACE's own ML model -----------------------------
+    // `mock` runs the deterministic in-process model; `remote` calls the
+    // trained model service over HTTP. Nothing else in the app changes.
+    ML_PROVIDER: z.enum(["mock", "remote"]).default("mock"),
+    MODEL_API_URL: z.preprocess(
+      (v) => (v === "" ? undefined : v),
+      z.string().url("MODEL_API_URL must be an absolute http(s) URL").optional(),
+    ),
+    MODEL_API_KEY: z.preprocess((v) => (v === "" ? undefined : v), z.string().min(1).optional()),
+    MODEL_TIMEOUT_MS: z.coerce.number().int().min(500).max(60_000).default(8_000),
+    MODEL_VERSION: z.string().min(1).default("vasptrace-risk-v1"),
+
+    // --- AI SYSTEM 2: external LLM (investigator copilot) ------------------
+    LLM_PROVIDER: z.enum(["none", "openai", "gemini", "anthropic"]).default("none"),
+    LLM_API_KEY: z.preprocess((v) => (v === "" ? undefined : v), z.string().min(1).optional()),
+    LLM_MODEL: z.preprocess((v) => (v === "" ? undefined : v), z.string().min(1).optional()),
+    LLM_BASE_URL: z.preprocess(
+      (v) => (v === "" ? undefined : v),
+      z.string().url("LLM_BASE_URL must be an absolute http(s) URL").optional(),
+    ),
+    LLM_TIMEOUT_MS: z.coerce.number().int().min(1000).max(120_000).default(45_000),
+    LLM_MAX_TOKENS: z.coerce.number().int().min(256).max(32_000).default(2_048),
+    /** How much investigation data may leave the platform. */
+    LLM_DATA_POLICY: z.enum(["FULL", "REDACTED", "DISABLED"]).default("REDACTED"),
+
+    /** Synthetic-data demonstration mode; always labelled in the UI. */
+    DEMO_MODE: z
+      .preprocess((v) => (v === "" ? undefined : v), z.enum(["true", "false"]).default("false"))
+      .transform((v) => v === "true"),
   })
+
   .superRefine((value, ctx) => {
     if (value.NODE_ENV !== "production") return;
 
