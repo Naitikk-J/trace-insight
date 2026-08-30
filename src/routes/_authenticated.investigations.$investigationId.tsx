@@ -156,36 +156,42 @@ function WorkspacePage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  if (investigation.isLoading) return <LoadingState rows={5} />;
-  if (investigation.error)
-    return <ErrorState message={investigation.error.message} />;
-
-  const record = investigation.data!;
-  const { graph, paths, entities, signals, timeline } = analysis!;
-
-  const selectedNode: GraphNode | null =
+  // Hooks must run on every render, so live lookups sit above the early returns.
+  const selectedNodeEarly: GraphNode | null =
     selection.kind === "wallet"
-      ? (graph?.nodes.find((n) => n.id === selection.id) ?? null)
+      ? (analysis?.graph?.nodes.find((n) => n.id === selection.id) ?? null)
       : null;
-  const primaryPath = paths ? paths[0] : null;
 
   const liveIntel = useQuery(
     addressIntelligenceQuery(
-      record.blockchain,
-      selectedNode?.address ?? "",
-      Boolean(selectedNode),
+      investigation.data?.blockchain ?? "ethereum",
+      selectedNodeEarly?.address ?? "",
+      Boolean(selectedNodeEarly && investigation.data),
     ),
   );
 
   const liveNeighbours = useQuery(
     addressNeighboursQuery(
-      record.blockchain,
-      selectedNode?.address ?? "",
+      investigation.data?.blockchain ?? "ethereum",
+      selectedNodeEarly?.address ?? "",
       "out",
       5,
-      Boolean(selectedNode),
+      Boolean(selectedNodeEarly && investigation.data),
     ),
   );
+
+  if (investigation.isLoading) return <LoadingState rows={5} />;
+  if (investigation.error)
+    return <ErrorState message={investigation.error.message} />;
+  if (!investigation.data || !analysis)
+    return <ErrorState message="Investigation not found." />;
+
+  const record = investigation.data;
+  const { graph, paths, entities, signals, timeline } = analysis;
+
+  const selectedNode = selectedNodeEarly;
+  const primaryPath = paths ? paths[0] : null;
+
 
   const handleTraceFromNode = (address: string) => {
     openInvestigationModal(record.case_id);
