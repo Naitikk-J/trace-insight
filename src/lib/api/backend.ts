@@ -261,10 +261,10 @@ export interface AddressIntelligenceResponse {
     chain: string;
     isVasp: boolean;
     label: string | null;
-    tags: string[];
-    totalReceivedUsd: number;
-    totalSpentUsd: number;
-    balanceUsd: number;
+    tags?: string[];
+    totalReceivedUsd?: number;
+    totalSpentUsd?: number;
+    balanceUsd?: number;
     category?: string;
   };
   riskScore: number;
@@ -301,8 +301,8 @@ export interface AddressNeighboursResponse {
     address: string;
     label: string | null;
     isVasp: boolean;
-    valueUsd: number;
-    txCount: number;
+    valueUsd?: number;
+    txCount?: number;
   }[];
 }
 

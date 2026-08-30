@@ -716,7 +716,7 @@ function WorkspacePage() {
                               {nbr.label ? nbr.label : truncateAddress(nbr.address, 6, 4)}
                             </span>
                             <span className="text-muted-foreground">
-                              ${nbr.valueUsd.toLocaleString()} ({nbr.txCount} txs)
+                              {usd(nbr.valueUsd)} ({nbr.txCount ?? 0} txs)
                             </span>
                           </div>
                         ))}
