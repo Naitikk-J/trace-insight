@@ -14,14 +14,17 @@ import {
   setBackendToken,
 } from "./client";
 import type {
+  AiSystemsStatus,
   AlertRecord,
   AlertStatus,
+  CopilotAnswer,
   AttributionSummary,
   BackendUser,
   Complaint,
   ComplaintSource,
   FraudType,
   LeaReport,
+  RoutePrediction,
   TriageQueue,
 } from "./backend-types";
 
