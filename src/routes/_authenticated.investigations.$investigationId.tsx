@@ -54,6 +54,13 @@ import {
 } from "@/lib/api/backend";
 import { useUIStore, useWorkspaceStore } from "@/stores/ui";
 
+/** Formats a possibly-missing USD amount without crashing on undefined. */
+function usd(value: number | null | undefined): string {
+  return typeof value === "number" && Number.isFinite(value)
+    ? `$${Math.round(value).toLocaleString()}`
+    : "—";
+}
+
 export const Route = createFileRoute(
   "/_authenticated/investigations/$investigationId",
 )({
@@ -286,7 +293,7 @@ function WorkspacePage() {
               onClick={() =>
                 primaryPath &&
                 recordFinding.mutate({
-                  title: `Primary path terminates at ${NODE_KIND_LABEL[primaryPath.endpointKind].toLowerCase()}`,
+                  title: `Primary path terminates at ${(NODE_KIND_LABEL[primaryPath.endpointKind] ?? "unknown endpoint").toLowerCase()}`,
                   description: `${primaryPath.verdict} ${primaryPath.valuePreserved} preserved across ${primaryPath.hops} hops (continuity ${(primaryPath.continuity * 100).toFixed(0)}%).`,
                   severity: primaryPath.continuity > 0.7 ? "high" : "medium",
                   confidence: primaryPath.confidence,
@@ -662,28 +669,28 @@ function WorkspacePage() {
                         <span className="mono text-[10px] font-semibold text-intel uppercase tracking-wider block">
                           Live Chain Telemetry
                         </span>
-                        <Chip tone={liveIntel.data.riskScore > 60 ? "critical" : "positive"}>
-                          Risk: {liveIntel.data.riskScore}/100
+                        <Chip tone={(liveIntel.data.riskScore ?? 0) > 60 ? "critical" : "positive"}>
+                          Risk: {liveIntel.data.riskScore ?? 0}/100
                         </Chip>
                       </div>
                       <dl className="mono space-y-1 text-[11px]">
                         <Row
                           label="Total Received"
-                          value={`$${liveIntel.data.address.totalReceivedUsd.toLocaleString()}`}
+                          value={usd(liveIntel.data.address.totalReceivedUsd)}
                         />
                         <Row
                           label="Total Spent"
-                          value={`$${liveIntel.data.address.totalSpentUsd.toLocaleString()}`}
+                          value={usd(liveIntel.data.address.totalSpentUsd)}
                         />
                         <Row
                           label="Current Balance"
-                          value={`$${liveIntel.data.address.balanceUsd.toLocaleString()}`}
+                          value={usd(liveIntel.data.address.balanceUsd)}
                         />
                         <Row label="Data Provider" value={liveIntel.data.sourceLabel} />
                       </dl>
-                      {liveIntel.data.address.tags.length > 0 && (
+                      {(liveIntel.data.address.tags?.length ?? 0) > 0 && (
                         <div className="flex flex-wrap gap-1 pt-1 border-t border-border/40">
-                          {liveIntel.data.address.tags.map((tag) => (
+                          {(liveIntel.data.address.tags ?? []).map((tag) => (
                             <Chip key={tag} tone="intel" className="text-[9px]">
                               {tag}
                             </Chip>
@@ -694,13 +701,13 @@ function WorkspacePage() {
                   )}
 
                   {/* Live Counterparty Neighbours */}
-                  {liveNeighbours.data && liveNeighbours.data.neighbours.length > 0 && (
+                  {liveNeighbours.data && (liveNeighbours.data.neighbours?.length ?? 0) > 0 && (
                     <div className="p-3 rounded-lg border border-border/80 bg-background/60 space-y-2">
                       <span className="mono text-[10px] font-semibold text-foreground uppercase tracking-wider block">
-                        Direct Counterparties ({liveNeighbours.data.neighbours.length})
+                        Direct Counterparties ({liveNeighbours.data.neighbours?.length ?? 0})
                       </span>
                       <div className="space-y-1.5">
-                        {liveNeighbours.data.neighbours.map((nbr) => (
+                        {(liveNeighbours.data.neighbours ?? []).map((nbr) => (
                           <div
                             key={nbr.address}
                             className="flex items-center justify-between text-[10px] mono p-1.5 rounded bg-surface/50 border border-border/40"
