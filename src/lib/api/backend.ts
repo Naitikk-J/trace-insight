@@ -70,6 +70,33 @@ export function backendLogout() {
   setBackendToken(null);
 }
 
+/**
+ * Built-in demo investigator shipped with the intelligence service seed.
+ * Lets the attribution screens work without a manual sign-in step.
+ */
+export const DEMO_SERVICE_CREDENTIALS = {
+  email: "analyst@tracify.io",
+  password: "TracifyDemo2026!",
+} as const;
+
+let autoConnecting: Promise<void> | null = null;
+
+/** Sign in with the built-in demo investigator when no session exists. */
+export function backendAutoConnect(): Promise<void> {
+  if (getBackendToken()) return Promise.resolve();
+  autoConnecting ??= backendLogin(
+    DEMO_SERVICE_CREDENTIALS.email,
+    DEMO_SERVICE_CREDENTIALS.password,
+  )
+    .then(() => undefined)
+    .catch(() => undefined)
+    .finally(() => {
+      autoConnecting = null;
+    });
+  return autoConnecting;
+}
+
+
 export { getBackendToken, backendConfigured };
 
 /* ---------------- Complaints ---------------- */
