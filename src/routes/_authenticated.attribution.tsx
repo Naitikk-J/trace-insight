@@ -187,11 +187,11 @@ function AttributionConsole() {
             )}
             Attribute address
           </Button>
-          {providers.data ? (
+          {providers.data?.providers?.length ? (
             <div className="flex flex-wrap gap-1.5">
-              {Object.entries(providers.data).map(([key, value]) => (
-                <Chip key={key} tone={String(value).includes("graphsense") ? "positive" : "neutral"}>
-                  {key} · {String(value)}
+              {providers.data.providers.map((p) => (
+                <Chip key={`${p.chain}-${p.provider}`} tone={p.live ? "positive" : "neutral"}>
+                  {p.chain} · {p.provider}
                 </Chip>
               ))}
             </div>
