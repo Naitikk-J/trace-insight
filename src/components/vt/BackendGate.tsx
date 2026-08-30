@@ -90,8 +90,8 @@ function Notice({
 export function BackendConnectPanel() {
   const { connected, user, online } = useBackend();
   const queryClient = useQueryClient();
-  const [email, setEmail] = useState(DEMO_SERVICE_CREDENTIALS.email);
-  const [password, setPassword] = useState(DEMO_SERVICE_CREDENTIALS.password);
+  const [email, setEmail] = useState<string>(DEMO_SERVICE_CREDENTIALS.email);
+  const [password, setPassword] = useState<string>(DEMO_SERVICE_CREDENTIALS.password);
   const [busy, setBusy] = useState(false);
 
   const submit = async (e: React.FormEvent) => {
