@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Chip } from "@/components/vt/badges";
 import { useBackend } from "@/hooks/useBackend";
-import { backendLogin, backendLogout } from "@/lib/api/backend";
+import { DEMO_SERVICE_CREDENTIALS, backendLogin, backendLogout } from "@/lib/api/backend";
 
 /** Compact connection indicator for page headers. */
 export function BackendStatusChip() {
@@ -90,8 +90,8 @@ function Notice({
 export function BackendConnectPanel() {
   const { connected, user, online } = useBackend();
   const queryClient = useQueryClient();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState(DEMO_SERVICE_CREDENTIALS.email);
+  const [password, setPassword] = useState(DEMO_SERVICE_CREDENTIALS.password);
   const [busy, setBusy] = useState(false);
 
   const submit = async (e: React.FormEvent) => {

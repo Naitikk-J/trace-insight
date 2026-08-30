@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 
 import {
+  backendAutoConnect,
   backendConfigured,
   backendHealthQuery,
   backendMeQuery,
@@ -32,6 +33,13 @@ export function useBackend() {
   }, []);
 
   const health = useQuery(backendHealthQuery());
+
+  // The service ships a built-in demo investigator; connect automatically so
+  // attribution screens are usable without a manual sign-in.
+  useEffect(() => {
+    if (!hydrated || token || !health.isSuccess) return;
+    void backendAutoConnect().then(() => setToken(getBackendToken()));
+  }, [hydrated, token, health.isSuccess]);
   const me = useQuery({ ...backendMeQuery(token), enabled: hydrated && Boolean(token) });
 
   const configured = backendConfigured();
