@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { aiRouter } from "./ai.routes";
 import { alertRouter } from "./alert.routes";
 import { authRouter } from "./auth.routes";
 import { complaintRouter } from "./complaint.routes";
@@ -28,3 +29,4 @@ apiRouter.use("/intelligence", intelligenceRouter);
 apiRouter.use("/findings", findingRouter);
 apiRouter.use("/evidence", evidenceRouter);
 apiRouter.use("/reports", reportRouter);
+apiRouter.use("/ai", aiRouter);
