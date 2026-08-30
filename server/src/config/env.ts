@@ -34,6 +34,25 @@ const envSchema = z
       z.string().min(16, "INTAKE_API_KEYS entries must be long random values").optional(),
     ),
 
+    // AI System 1 — remote money-route scoring model. Absent URL = baseline
+    // in-process logistic model (always available, fully explainable).
+    TRACIFY_ML_URL: z
+      .preprocess((v) => (v === "" ? undefined : v), z.string().url().optional()),
+    TRACIFY_ML_API_KEY: z
+      .preprocess((v) => (v === "" ? undefined : v), z.string().min(1).optional()),
+    TRACIFY_ML_TIMEOUT_MS: z.coerce.number().int().min(1000).max(30_000).default(8_000),
+
+    // AI System 2 — investigator copilot (external LLM). Absent key =
+    // deterministic local briefing (no data leaves the platform).
+    LLM_PROVIDER: z.enum(["openai", "gemini", "anthropic"]).default("openai"),
+    LLM_API_KEY: z
+      .preprocess((v) => (v === "" ? undefined : v), z.string().min(1).optional()),
+    LLM_MODEL: z.string().min(1).default("gpt-4o-mini"),
+    LLM_TIMEOUT_MS: z.coerce.number().int().min(1000).max(120_000).default(30_000),
+    // Egress policy: what the copilot context may contain.
+    LLM_SEND_FULL_ADDRESSES: z.coerce.boolean().default(false),
+    LLM_SEND_VICTIM_DETAILS: z.coerce.boolean().default(false),
+
   })
   .superRefine((value, ctx) => {
     if (value.NODE_ENV !== "production") return;
@@ -99,6 +118,10 @@ export const env = {
   isDevelopment: raw.NODE_ENV === "development",
   /** True when a live chain-data provider is configured. */
   hasGraphSense: Boolean(raw.GRAPHSENSE_API_URL),
+  /** True when a remote route-scoring model is configured. */
+  hasRemoteMl: Boolean(raw.TRACIFY_ML_URL),
+  /** True when an external LLM copilot is configured. */
+  hasLlm: Boolean(raw.LLM_API_KEY),
   /** Configured intake API keys; empty disables the machine intake surface. */
   intakeApiKeys: (raw.INTAKE_API_KEYS ?? "")
     .split(",")
