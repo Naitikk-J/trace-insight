@@ -55,7 +55,8 @@ export function BackendGate({ children }: { children: React.ReactNode }) {
       <Notice
         icon={ServerCrash}
         title="The attribution service is not responding"
-        body="The workspace reached the configured URL but got no healthy response. Confirm the service and its database are running, then retry."
+        body="The workspace could not get a healthy response from the configured service URL. Two common causes: the service is cold-starting (wait ~60s and retry), or it does not list this site as an allowed origin."
+
       />
     );
   }

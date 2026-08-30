@@ -1,7 +1,7 @@
 import cors from "cors";
 import express, { type Express } from "express";
 import helmet from "helmet";
-import { env } from "./config/env";
+import { env, isOriginAllowed } from "./config/env";
 import { errorHandler } from "./middleware/error.middleware";
 import { notFoundHandler } from "./middleware/notFound.middleware";
 import {
@@ -39,7 +39,7 @@ export function createApp(): Express {
     cors({
       origin(origin, callback) {
         // Allow same-origin/tooling requests without an Origin header.
-        if (!origin || env.allowedOrigins.includes(origin)) {
+        if (!origin || isOriginAllowed(origin)) {
           callback(null, true);
           return;
         }
