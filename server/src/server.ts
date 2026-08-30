@@ -42,6 +42,14 @@ async function bootstrap(): Promise<void> {
     process.exit(1);
   }
 
+  try {
+    await ensureDemoInvestigator();
+  } catch (error) {
+    logger.error("demo investigator provisioning failed", {
+      reason: error instanceof Error ? error.message : String(error),
+    });
+  }
+
   const app = createApp();
   const server: Server = app.listen(env.PORT, () => {
     logger.info("api listening", { port: env.PORT, env: env.NODE_ENV });
