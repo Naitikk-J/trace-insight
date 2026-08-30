@@ -3,9 +3,34 @@ import { createApp } from "./app";
 import { connectDatabase, disconnectDatabase } from "./config/db";
 import { env } from "./config/env";
 import { beginShutdown, isShuttingDown } from "./lifecycle";
+import { User, hashPassword } from "./models/User.model";
 import { logger } from "./utils/logger";
 
 const SHUTDOWN_GRACE_MS = 15_000;
+
+const DEMO_EMAIL = "analyst@tracify.io";
+const DEMO_PASSWORD = "TracifyDemo2026!";
+
+/**
+ * The hosted demo needs the built-in investigator to exist even though the
+ * full seed script refuses to run in production. Upsert just that one account.
+ */
+async function ensureDemoInvestigator(): Promise<void> {
+  const passwordHash = await hashPassword(DEMO_PASSWORD);
+  await User.updateOne(
+    { email: DEMO_EMAIL },
+    {
+      $set: {
+        name: "Ada Kestrel",
+        passwordHash,
+        role: "admin",
+        organisation: "Tracify Financial Intelligence Unit",
+      },
+    },
+    { upsert: true },
+  );
+  logger.info("demo investigator ready", { email: DEMO_EMAIL });
+}
 
 async function bootstrap(): Promise<void> {
   try {
