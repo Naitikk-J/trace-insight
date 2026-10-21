@@ -32,12 +32,7 @@ interface ChainConfig {
 /** Etherscan V2 multichain endpoint. One key works across every listed chain. */
 const ETHERSCAN_V2_BASE = "https://api.etherscan.io/v2/api";
 
-/**
- * SIH demo fallback — a single Etherscan V2 multichain key that works across
- * Ethereum, Polygon, BSC, and Arbitrum. Overridden by ETHERSCAN_API_KEY /
- * POLYGONSCAN_API_KEY / BSCSCAN_API_KEY when set in the environment.
- */
-const DEFAULT_ETHERSCAN_KEY = "REDACTED";
+const DEFAULT_ETHERSCAN_KEY = "";
 
 const EVM_CONFIG: Partial<Record<Chain, ChainConfig>> = {
   ethereum: {

@@ -47,3 +47,7 @@ awskey*
 docs/awskey.txt
 
 
+.env.*
+!.env.example
+!.env.sample
+.vercel
